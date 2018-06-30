@@ -1,0 +1,46 @@
+<html>
+<head>
+<title>plugins.js</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #999999; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(128,128,128); font-style: italic; }
+.s1 { color: rgb(0,0,0); }
+.s2 { color: rgb(0,0,128); font-weight: bold; }
+.s3 { color: rgb(0,128,0); font-weight: bold; }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+plugins.js</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">// Avoid `console` errors in browsers that lack a console.</span><span class="s1"> 
+(</span><span class="s2">function</span><span class="s1">() { 
+  </span><span class="s2">var </span><span class="s1">method; 
+  </span><span class="s2">var </span><span class="s1">noop = </span><span class="s2">function </span><span class="s1">() {}; 
+  </span><span class="s2">var </span><span class="s1">methods = [ 
+    </span><span class="s3">'assert'</span><span class="s1">, </span><span class="s3">'clear'</span><span class="s1">, </span><span class="s3">'count'</span><span class="s1">, </span><span class="s3">'debug'</span><span class="s1">, </span><span class="s3">'dir'</span><span class="s1">, </span><span class="s3">'dirxml'</span><span class="s1">, </span><span class="s3">'error'</span><span class="s1">, 
+    </span><span class="s3">'exception'</span><span class="s1">, </span><span class="s3">'group'</span><span class="s1">, </span><span class="s3">'groupCollapsed'</span><span class="s1">, </span><span class="s3">'groupEnd'</span><span class="s1">, </span><span class="s3">'info'</span><span class="s1">, </span><span class="s3">'log'</span><span class="s1">, 
+    </span><span class="s3">'markTimeline'</span><span class="s1">, </span><span class="s3">'profile'</span><span class="s1">, </span><span class="s3">'profileEnd'</span><span class="s1">, </span><span class="s3">'table'</span><span class="s1">, </span><span class="s3">'time'</span><span class="s1">, </span><span class="s3">'timeEnd'</span><span class="s1">, 
+    </span><span class="s3">'timeline'</span><span class="s1">, </span><span class="s3">'timelineEnd'</span><span class="s1">, </span><span class="s3">'timeStamp'</span><span class="s1">, </span><span class="s3">'trace'</span><span class="s1">, </span><span class="s3">'warn'</span><span class="s1"> 
+  ]; 
+  </span><span class="s2">var </span><span class="s1">length = methods.length; 
+  </span><span class="s2">var </span><span class="s1">console = (window.console = window.console || {}); 
+ 
+  </span><span class="s2">while </span><span class="s1">(length--) { 
+    method = methods[length]; 
+ 
+    </span><span class="s0">// Only stub undefined methods.</span><span class="s1"> 
+    </span><span class="s2">if </span><span class="s1">(!console[method]) { 
+      console[method] = noop; 
+    } 
+  } 
+}()); 
+ 
+</span><span class="s0">// Place any jQuery/helper plugins in here.</span><span class="s1"> 
+</span></pre>
+</body>
+</html>

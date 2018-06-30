@@ -1,0 +1,55 @@
+<html>
+<head>
+<title>.travis.yml</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #999999; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(128,128,128); font-style: italic; }
+.s1 { color: rgb(0,0,0); }
+.s2 { color: rgb(0,0,128); font-weight: bold; }
+.s3 { color: rgb(0,128,0); font-weight: bold; }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+.travis.yml</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0"># For more information about the configurations used</span><span class="s1"> 
+</span><span class="s0"># in this file, please see the Travis CI documentation:</span><span class="s1"> 
+</span><span class="s0"># https://docs.travis-ci.com</span><span class="s1"> 
+ 
+</span><span class="s2">after_success:</span><span class="s1"> 
+  - | 
+ 
+      # Automatically update the content from the `dist/` directory 
+ 
+      $(npm bin)/travis-after-all \ 
+        &amp;&amp; $(npm bin)/set-up-ssh -k &quot;$encrypted_7289798db853_key&quot; \ 
+                                 -iv &quot;$encrypted_7289798db853_iv&quot; \ 
+                                 --path-encrypted-key &quot;.travis/github_deploy_key.enc&quot; \ 
+        &amp;&amp; $(npm bin)/commit-changes --branch &quot;master&quot; \ 
+                                     --commands &quot;npm run build&quot; \ 
+                                     --commit-message &quot;Update content from the \`dist\` directory [skip ci]&quot; 
+ 
+</span><span class="s2">env:</span><span class="s1"> 
+  </span><span class="s2">global:</span><span class="s1"> 
+    - </span><span class="s2">secure: </span><span class="s3">&quot;uZ0R71TG9AR+kbfM9rwa8PPNr3f9E0C4OuA0s6g0Gq15bBcpVxPvus0/eJdW+O2NSzZE1GbzS//hBiP+chK/8X4DyNIRutlGk5RYdnTTFEaZo9jp0BvlvprUYlGgpprR/531zQ9ahkc0STwVvzurGzlcF4NNMiISAJJ1IdQZABc=&quot;</span><span class="s1"> 
+ 
+</span><span class="s2">git:</span><span class="s1"> 
+  </span><span class="s2">depth: </span><span class="s1">10 
+ 
+</span><span class="s2">language: </span><span class="s1">node_js 
+ 
+</span><span class="s2">node_js:</span><span class="s1"> 
+  - 6 
+  - 8 
+  - 9 
+ 
+</span><span class="s2">dist: </span><span class="s1">trusty 
+</span><span class="s2">sudo: </span><span class="s1">false 
+</span></pre>
+</body>
+</html>

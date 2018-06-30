@@ -1,0 +1,54 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>文件处理</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="manifest" href="src/site.webmanifest">
+  <link rel="apple-touch-icon" href="src/icon.png">
+  <!-- Place favicon.ico in the root directory -->
+
+</head>
+
+<body>
+<script src="src/js/plugins.js"></script>
+<script src="src/js/main.js"></script>
+
+<!--<input id="fileSelect" type="file" name="选择文件名" type="button" onclick="getSelectFile();"/>-->
+<input id=b type=file name="选择文件夹" webkitdirectory type="button" onclick="getSelectPath();"/>
+<input name="path1" , id="path1">
+
+<!--<form name="SelectFile">-->
+<!--<input type="file" name="selectFile" id="selectFile" style="display:none;" onChange="document.SelectFile.path.value=this.value">-->
+<!--<input name="fileName" style="width:400px" readonly>-->
+<!--<input type="button" value="选择单个文件" onclick="document.SelectFile.selectFile.click()">-->
+<!--</form>-->
+
+<script>
+  function getPath(allPathName) {
+    if (allPathName.length <= 0) {
+      return
+    }
+    var index = allPathName.lastIndexOf('\\')
+    if (index <= 0) {
+      return
+    }
+    return allPathName.substr(0, index)
+  }
+</script>
+
+<form name="SelectPath">
+  <input type="file" webkitdirectory name="selectPathName" id="selectPathId" style="display:none;"
+         onChange="document.SelectPath.pathName.value=getPath(this.value)">
+  <input name="pathName" id="pathId" style="width:400px" readonly>
+  <input type="button" value="选择文件夹" onclick="document.SelectPath.selectPathName.click()">
+</form>
+
+</body>
+
+
+</html>

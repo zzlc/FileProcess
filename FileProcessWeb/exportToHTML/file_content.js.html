@@ -1,0 +1,108 @@
+<html>
+<head>
+<title>file_content.js</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #999999; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(128,128,128); font-style: italic; }
+.s1 { color: rgb(0,0,0); }
+.s2 { color: rgb(0,0,128); font-weight: bold; }
+.s3 { color: rgb(0,128,0); font-weight: bold; }
+.s4 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+file_content.js</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">/* jshint mocha: true */</span><span class="s1"> 
+ 
+</span><span class="s2">import </span><span class="s1">assert from </span><span class="s3">'assert'</span><span class="s1">; 
+</span><span class="s2">import </span><span class="s1">fs from </span><span class="s3">'fs'</span><span class="s1">; 
+</span><span class="s2">import </span><span class="s1">path from </span><span class="s3">'path'</span><span class="s1">; 
+ 
+</span><span class="s2">import </span><span class="s1">pkg from </span><span class="s3">'./../package.json'</span><span class="s1">; 
+ 
+</span><span class="s2">const </span><span class="s1">dirs = pkg[</span><span class="s3">'h5bp-configs'</span><span class="s1">].directories; 
+ 
+</span><span class="s0">// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</span><span class="s1"> 
+ 
+</span><span class="s2">function </span><span class="s1">checkString(file, string, done) { 
+ 
+  </span><span class="s2">let </span><span class="s1">character = </span><span class="s3">''</span><span class="s1">; 
+  </span><span class="s2">let </span><span class="s1">matchFound = </span><span class="s2">false</span><span class="s1">; 
+  </span><span class="s2">let </span><span class="s1">matchedPositions = </span><span class="s4">0</span><span class="s1">; 
+  </span><span class="s2">const </span><span class="s1">readStream = fs.createReadStream(file, {</span><span class="s3">'encoding'</span><span class="s1">: </span><span class="s3">'utf8'</span><span class="s1">}); 
+ 
+  readStream.on(</span><span class="s3">'close'</span><span class="s1">, done); 
+  readStream.on(</span><span class="s3">'error'</span><span class="s1">, done); 
+  readStream.on(</span><span class="s3">'readable'</span><span class="s1">, </span><span class="s2">function </span><span class="s1">() { 
+ 
+    </span><span class="s0">// Read file until the string is found</span><span class="s1"> 
+    </span><span class="s0">// or the whole file has been read</span><span class="s1"> 
+    </span><span class="s2">while </span><span class="s1">(matchFound !== </span><span class="s2">true </span><span class="s1">&amp;&amp; 
+                (character = readStream.read(</span><span class="s4">1</span><span class="s1">)) !== </span><span class="s2">null</span><span class="s1">) { 
+ 
+      </span><span class="s2">if </span><span class="s1">(character === string.charAt(matchedPositions)) { 
+        matchedPositions += </span><span class="s4">1</span><span class="s1">; 
+      } </span><span class="s2">else </span><span class="s1">{ 
+        matchedPositions = </span><span class="s4">0</span><span class="s1">; 
+      } 
+ 
+      </span><span class="s2">if </span><span class="s1">(matchedPositions === string.length) { 
+        matchFound = </span><span class="s2">true</span><span class="s1">; 
+      } 
+ 
+    } 
+ 
+    assert.equal(</span><span class="s2">true</span><span class="s1">, matchFound); 
+    </span><span class="s2">this</span><span class="s1">.close(); 
+ 
+  }); 
+ 
+} 
+ 
+</span><span class="s0">// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</span><span class="s1"> 
+ 
+</span><span class="s2">function </span><span class="s1">runTests() { 
+ 
+  </span><span class="s2">const </span><span class="s1">dir = dirs.dist; 
+ 
+  describe(</span><span class="s3">`Test if the files from the &quot;</span><span class="s1">${dir}</span><span class="s3">&quot; directory have the expected content`</span><span class="s1">, () =&gt; { 
+ 
+    it(</span><span class="s3">'&quot;.htaccess&quot; should have the &quot;ErrorDocument...&quot; line uncommented'</span><span class="s1">, (done) =&gt; { 
+      </span><span class="s2">const </span><span class="s1">string = </span><span class="s3">'</span><span class="s2">\n\n</span><span class="s3">ErrorDocument 404 /404.html</span><span class="s2">\n\n</span><span class="s3">'</span><span class="s1">; 
+      checkString(path.resolve(dir, </span><span class="s3">'.htaccess'</span><span class="s1">), string, done); 
+    }); 
+ 
+    it(</span><span class="s3">'&quot;index.html&quot; should contain the correct jQuery version in the CDN URL'</span><span class="s1">, (done) =&gt; { 
+      </span><span class="s2">const </span><span class="s1">string = </span><span class="s3">`code.jquery.com/jquery-</span><span class="s1">${pkg.devDependencies.jquery}</span><span class="s3">.min.js`</span><span class="s1">; 
+      checkString(path.resolve(dir, </span><span class="s3">'index.html'</span><span class="s1">), string, done); 
+    }); 
+ 
+    it(</span><span class="s3">'&quot;index.html&quot; should contain the correct jQuery version in the local URL'</span><span class="s1">, (done) =&gt; { 
+      </span><span class="s2">const </span><span class="s1">string = </span><span class="s3">`js/vendor/jquery-</span><span class="s1">${pkg.devDependencies.jquery}</span><span class="s3">.min.js`</span><span class="s1">; 
+      checkString(path.resolve(dir, </span><span class="s3">'index.html'</span><span class="s1">), string, done); 
+    }); 
+ 
+    it(</span><span class="s3">'&quot;index.html&quot; should contain the correct Modernizr version in the local URL'</span><span class="s1">, (done) =&gt; { 
+      </span><span class="s2">const </span><span class="s1">string = </span><span class="s3">`js/vendor/modernizr-</span><span class="s1">${pkg.devDependencies.modernizr}</span><span class="s3">.min.js`</span><span class="s1">; 
+      checkString(path.resolve(dir, </span><span class="s3">'index.html'</span><span class="s1">), string, done); 
+    }); 
+ 
+    it(</span><span class="s3">'&quot;main.css&quot; should contain a custom banner'</span><span class="s1">, </span><span class="s2">function </span><span class="s1">(done) { 
+      </span><span class="s2">const </span><span class="s1">string = </span><span class="s3">`/*! HTML5 Boilerplate v</span><span class="s1">${pkg.version}</span><span class="s3"> | </span><span class="s1">${pkg.license}</span><span class="s3"> License | </span><span class="s1">${pkg.homepage}</span><span class="s3"> */</span><span class="s2">\n\n</span><span class="s3">/*</span><span class="s2">\n</span><span class="s3">`</span><span class="s1">; 
+      checkString(path.resolve(dir, </span><span class="s3">'css/main.css'</span><span class="s1">), string, done); 
+    }); 
+ 
+  }); 
+ 
+} 
+ 
+runTests(); 
+</span></pre>
+</body>
+</html>

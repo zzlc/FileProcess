@@ -1,0 +1,218 @@
+<html>
+<head>
+<title>gulpfile.babel.js</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #999999; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,128); font-weight: bold; }
+.s1 { color: rgb(0,0,0); }
+.s2 { color: rgb(0,128,0); font-weight: bold; }
+.s3 { color: rgb(128,128,128); font-style: italic; }
+.s4 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+gulpfile.babel.js</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">import </span><span class="s1">fs from </span><span class="s2">'fs'</span><span class="s1">; 
+</span><span class="s0">import </span><span class="s1">path from </span><span class="s2">'path'</span><span class="s1">; 
+ 
+</span><span class="s0">import </span><span class="s1">gulp from </span><span class="s2">'gulp'</span><span class="s1">; 
+ 
+</span><span class="s3">// Load all gulp plugins automatically</span><span class="s1"> 
+</span><span class="s3">// and attach them to the `plugins` object</span><span class="s1"> 
+</span><span class="s0">import </span><span class="s1">plugins from </span><span class="s2">'gulp-load-plugins'</span><span class="s1">; 
+ 
+</span><span class="s3">// Temporary solution until gulp 4</span><span class="s1"> 
+</span><span class="s3">// https://github.com/gulpjs/gulp/issues/355</span><span class="s1"> 
+</span><span class="s0">import </span><span class="s1">runSequence from </span><span class="s2">'run-sequence'</span><span class="s1">; 
+ 
+</span><span class="s0">import </span><span class="s1">archiver from </span><span class="s2">'archiver'</span><span class="s1">; 
+</span><span class="s0">import </span><span class="s1">glob from </span><span class="s2">'glob'</span><span class="s1">; 
+</span><span class="s0">import </span><span class="s1">del from </span><span class="s2">'del'</span><span class="s1">; 
+</span><span class="s0">import </span><span class="s1">ssri from </span><span class="s2">'ssri'</span><span class="s1">; 
+</span><span class="s0">import </span><span class="s1">modernizr from </span><span class="s2">'modernizr'</span><span class="s1">; 
+ 
+</span><span class="s0">import </span><span class="s1">pkg from </span><span class="s2">'./package.json'</span><span class="s1">; 
+</span><span class="s0">import </span><span class="s1">modernizrConfig from </span><span class="s2">'./modernizr-config.json'</span><span class="s1">; 
+ 
+ 
+</span><span class="s0">const </span><span class="s1">dirs = pkg[</span><span class="s2">'h5bp-configs'</span><span class="s1">].directories; 
+ 
+</span><span class="s3">// ---------------------------------------------------------------------</span><span class="s1"> 
+</span><span class="s3">// | Helper tasks                                                      |</span><span class="s1"> 
+</span><span class="s3">// ---------------------------------------------------------------------</span><span class="s1"> 
+ 
+gulp.task(</span><span class="s2">'archive:create_archive_dir'</span><span class="s1">, () =&gt; { 
+  fs.mkdirSync(path.resolve(dirs.archive), </span><span class="s2">'0755'</span><span class="s1">); 
+}); 
+ 
+gulp.task(</span><span class="s2">'archive:zip'</span><span class="s1">, (done) =&gt; { 
+ 
+  </span><span class="s0">const </span><span class="s1">archiveName = path.resolve(dirs.archive, </span><span class="s2">`</span><span class="s1">${pkg.name}</span><span class="s2">_v</span><span class="s1">${pkg.version}</span><span class="s2">.zip`</span><span class="s1">); 
+  </span><span class="s0">const </span><span class="s1">zip = archiver(</span><span class="s2">'zip'</span><span class="s1">); 
+  </span><span class="s0">const </span><span class="s1">files = glob.sync(</span><span class="s2">'**/*.*'</span><span class="s1">, { 
+    </span><span class="s2">'cwd'</span><span class="s1">: dirs.dist, 
+    </span><span class="s2">'dot'</span><span class="s1">: </span><span class="s0">true </span><span class="s3">// include hidden files</span><span class="s1"> 
+  }); 
+  </span><span class="s0">const </span><span class="s1">output = fs.createWriteStream(archiveName); 
+ 
+  zip.on(</span><span class="s2">'error'</span><span class="s1">, (error) =&gt; { 
+    done(); 
+    </span><span class="s0">throw </span><span class="s1">error; 
+  }); 
+ 
+  output.on(</span><span class="s2">'close'</span><span class="s1">, done); 
+ 
+  files.forEach((file) =&gt; { 
+ 
+    </span><span class="s0">const </span><span class="s1">filePath = path.resolve(dirs.dist, file); 
+ 
+    </span><span class="s3">// `zip.bulk` does not maintain the file</span><span class="s1"> 
+    </span><span class="s3">// permissions, so we need to add files individually</span><span class="s1"> 
+    zip.append(fs.createReadStream(filePath), { 
+      </span><span class="s2">'name'</span><span class="s1">: file, 
+      </span><span class="s2">'mode'</span><span class="s1">: fs.statSync(filePath).mode 
+    }); 
+ 
+  }); 
+ 
+  zip.pipe(output); 
+  zip.finalize(); 
+ 
+}); 
+ 
+gulp.task(</span><span class="s2">'clean'</span><span class="s1">, (done) =&gt; { 
+  del([ 
+    dirs.archive, 
+    dirs.dist 
+  ]).then(() =&gt; { 
+    done(); 
+  }); 
+}); 
+ 
+gulp.task(</span><span class="s2">'copy'</span><span class="s1">, [ 
+  </span><span class="s2">'copy:.htaccess'</span><span class="s1">, 
+  </span><span class="s2">'copy:index.html'</span><span class="s1">, 
+  </span><span class="s2">'copy:jquery'</span><span class="s1">, 
+  </span><span class="s2">'copy:license'</span><span class="s1">, 
+  </span><span class="s2">'copy:main.css'</span><span class="s1">, 
+  </span><span class="s2">'copy:misc'</span><span class="s1">, 
+  </span><span class="s2">'copy:normalize'</span><span class="s1"> 
+]); 
+ 
+gulp.task(</span><span class="s2">'copy:.htaccess'</span><span class="s1">, () =&gt; 
+  gulp.src(</span><span class="s2">'node_modules/apache-server-configs/dist/.htaccess'</span><span class="s1">) 
+    .pipe(plugins().replace(</span><span class="s4">/# ErrorDocument/g</span><span class="s1">, </span><span class="s2">'ErrorDocument'</span><span class="s1">)) 
+    .pipe(gulp.dest(dirs.dist)) 
+); 
+ 
+gulp.task(</span><span class="s2">'copy:index.html'</span><span class="s1">, () =&gt; { 
+  </span><span class="s0">const </span><span class="s1">hash = ssri.fromData( 
+    fs.readFileSync(</span><span class="s2">'node_modules/jquery/dist/jquery.min.js'</span><span class="s1">), 
+    {algorithms: [</span><span class="s2">'sha256'</span><span class="s1">]} 
+  ); 
+  </span><span class="s0">let </span><span class="s1">version = pkg.devDependencies.jquery; 
+  </span><span class="s0">let </span><span class="s1">modernizrVersion = pkg.devDependencies.modernizr; 
+ 
+  gulp.src(</span><span class="s2">`</span><span class="s1">${dirs.src}</span><span class="s2">/index.html`</span><span class="s1">) 
+    .pipe(plugins().replace(</span><span class="s4">/{{JQUERY_VERSION}}/g</span><span class="s1">, version)) 
+    .pipe(plugins().replace(</span><span class="s4">/{{MODERNIZR_VERSION}}/g</span><span class="s1">, modernizrVersion)) 
+    .pipe(plugins().replace(</span><span class="s4">/{{JQUERY_SRI_HASH}}/g</span><span class="s1">, hash.toString())) 
+    .pipe(gulp.dest(dirs.dist)); 
+}); 
+ 
+gulp.task(</span><span class="s2">'copy:jquery'</span><span class="s1">, () =&gt; 
+  gulp.src([</span><span class="s2">'node_modules/jquery/dist/jquery.min.js'</span><span class="s1">]) 
+    .pipe(plugins().rename(</span><span class="s2">`jquery-</span><span class="s1">${pkg.devDependencies.jquery}</span><span class="s2">.min.js`</span><span class="s1">)) 
+    .pipe(gulp.dest(</span><span class="s2">`</span><span class="s1">${dirs.dist}</span><span class="s2">/js/vendor`</span><span class="s1">)) 
+); 
+ 
+gulp.task(</span><span class="s2">'copy:license'</span><span class="s1">, () =&gt; 
+  gulp.src(</span><span class="s2">'LICENSE.txt'</span><span class="s1">) 
+    .pipe(gulp.dest(dirs.dist)) 
+); 
+ 
+gulp.task(</span><span class="s2">'copy:main.css'</span><span class="s1">, () =&gt; { 
+ 
+  </span><span class="s0">const </span><span class="s1">banner = </span><span class="s2">`/*! HTML5 Boilerplate v</span><span class="s1">${pkg.version}</span><span class="s2"> | </span><span class="s1">${pkg.license}</span><span class="s2"> License | </span><span class="s1">${pkg.homepage}</span><span class="s2"> */</span><span class="s0">\n\n</span><span class="s2">`</span><span class="s1">; 
+ 
+  gulp.src(</span><span class="s2">`</span><span class="s1">${dirs.src}</span><span class="s2">/css/main.css`</span><span class="s1">) 
+    .pipe(plugins().header(banner)) 
+    .pipe(plugins().autoprefixer({ 
+      browsers: [</span><span class="s2">'last 2 versions'</span><span class="s1">, </span><span class="s2">'ie &gt;= 9'</span><span class="s1">, </span><span class="s2">'&gt; 1%'</span><span class="s1">], 
+      cascade: </span><span class="s0">false</span><span class="s1"> 
+    })) 
+    .pipe(gulp.dest(</span><span class="s2">`</span><span class="s1">${dirs.dist}</span><span class="s2">/css`</span><span class="s1">)); 
+}); 
+ 
+gulp.task(</span><span class="s2">'copy:misc'</span><span class="s1">, () =&gt; 
+  gulp.src([ 
+ 
+    </span><span class="s3">// Copy all files</span><span class="s1"> 
+    </span><span class="s2">`</span><span class="s1">${dirs.src}</span><span class="s2">/**/*`</span><span class="s1">, 
+ 
+    </span><span class="s3">// Exclude the following files</span><span class="s1"> 
+    </span><span class="s3">// (other tasks will handle the copying of these files)</span><span class="s1"> 
+    </span><span class="s2">`!</span><span class="s1">${dirs.src}</span><span class="s2">/css/main.css`</span><span class="s1">, 
+    </span><span class="s2">`!</span><span class="s1">${dirs.src}</span><span class="s2">/index.html`</span><span class="s1"> 
+ 
+  ], { 
+ 
+    </span><span class="s3">// Include hidden files by default</span><span class="s1"> 
+    dot: </span><span class="s0">true</span><span class="s1"> 
+ 
+  }).pipe(gulp.dest(dirs.dist)) 
+); 
+ 
+gulp.task(</span><span class="s2">'copy:normalize'</span><span class="s1">, () =&gt; 
+  gulp.src(</span><span class="s2">'node_modules/normalize.css/normalize.css'</span><span class="s1">) 
+    .pipe(gulp.dest(</span><span class="s2">`</span><span class="s1">${dirs.dist}</span><span class="s2">/css`</span><span class="s1">)) 
+); 
+ 
+gulp.task(</span><span class="s2">'modernizr'</span><span class="s1">, (done) =&gt;{ 
+ 
+  modernizr.build(modernizrConfig, (code) =&gt; { 
+    fs.writeFile(</span><span class="s2">`</span><span class="s1">${dirs.dist}</span><span class="s2">/js/vendor/modernizr-</span><span class="s1">${pkg.devDependencies.modernizr}</span><span class="s2">.min.js`</span><span class="s1">, code, done); 
+  }); 
+ 
+}); 
+ 
+gulp.task(</span><span class="s2">'lint:js'</span><span class="s1">, () =&gt; 
+  gulp.src([ 
+    </span><span class="s2">'gulpfile.js'</span><span class="s1">, 
+    </span><span class="s2">`</span><span class="s1">${dirs.src}</span><span class="s2">/js/*.js`</span><span class="s1">, 
+    </span><span class="s2">`</span><span class="s1">${dirs.test}</span><span class="s2">/*.js`</span><span class="s1"> 
+  ]).pipe(plugins().jscs()) 
+    .pipe(plugins().eslint()) 
+    .pipe(plugins().eslint.failOnError()) 
+); 
+ 
+ 
+</span><span class="s3">// ---------------------------------------------------------------------</span><span class="s1"> 
+</span><span class="s3">// | Main tasks                                                        |</span><span class="s1"> 
+</span><span class="s3">// ---------------------------------------------------------------------</span><span class="s1"> 
+ 
+gulp.task(</span><span class="s2">'archive'</span><span class="s1">, (done) =&gt; { 
+  runSequence( 
+    </span><span class="s2">'build'</span><span class="s1">, 
+    </span><span class="s2">'archive:create_archive_dir'</span><span class="s1">, 
+    </span><span class="s2">'archive:zip'</span><span class="s1">, 
+    done); 
+}); 
+ 
+gulp.task(</span><span class="s2">'build'</span><span class="s1">, (done) =&gt; { 
+  runSequence( 
+    [</span><span class="s2">'clean'</span><span class="s1">, </span><span class="s2">'lint:js'</span><span class="s1">], 
+    </span><span class="s2">'copy'</span><span class="s1">, </span><span class="s2">'modernizr'</span><span class="s1">, 
+    done); 
+}); 
+ 
+gulp.task(</span><span class="s2">'default'</span><span class="s1">, [</span><span class="s2">'build'</span><span class="s1">]); 
+</span></pre>
+</body>
+</html>
