@@ -12,6 +12,9 @@ using namespace std;
 
 #define PUBLIC_FILE_NAME_FILTER "_public_"
 
+const int block_size = 5 * 1024 * 1024;
+const float private_file_percent = 0.0025f;  //Ë½ÓÐ¿éÕ¼±È
+
 typedef struct _TSliceParams 
 {
     string          src_path;
@@ -27,11 +30,21 @@ typedef struct _TSliceParams
 class CGlobalConfig
 {
 public:
-    CGlobalConfig();
     ~CGlobalConfig();
+
+    static CGlobalConfig* Instance();
 
     void        SetAES128Key(const char* key_);
     const char* GetAES128Key();
+
+protected:
+    CGlobalConfig();
+
+    CGlobalConfig(const CGlobalConfig&) = delete;
+    CGlobalConfig operator = (const CGlobalConfig&) = delete;
+    CGlobalConfig(const CGlobalConfig&&) = delete;
+
+    static CGlobalConfig* _global_config_ptr;
 
 private:
     string _aes128_key = "0f1571c947d9e859abb7add6af7f6798";
@@ -43,4 +56,5 @@ extern std::string     unicode_to_utf(std::wstring str);
 extern std::wstring    utf_to_unicode(std::string str);
 
 extern bool            FileExist(const string& file_name_);
+extern int64_t         GetFileSize(const string& file_name_);
 

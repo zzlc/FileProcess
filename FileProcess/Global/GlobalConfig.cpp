@@ -2,16 +2,26 @@
 #include <io.h>
 
 CSpdLog* CSpdLog::_spd_logger_ptr = nullptr;
+CGlobalConfig* CGlobalConfig::_global_config_ptr = nullptr;
 
 CGlobalConfig::CGlobalConfig()
 {
+    LOGGER->info("{}", __FUNCTION__);
 }
-
 
 CGlobalConfig::~CGlobalConfig()
 {
+    LOGGER->info("{}", __FUNCTION__);
+    LOGGER->flush();
 }
 
+CGlobalConfig* CGlobalConfig::Instance()
+{
+    if (!_global_config_ptr) {
+        _global_config_ptr = new CGlobalConfig;
+    }
+    return _global_config_ptr;
+}
 
 void CGlobalConfig::SetAES128Key(const char* key_)
 {
@@ -91,5 +101,23 @@ extern bool FileExist(const string& file_name_)
     } else {
         return true;
     }
+}
+
+extern int64_t GetFileSize(const string& file_name_)
+{
+    if (file_name_.empty()) {
+        return -1;
+    }
+    if (!FileExist(file_name_)) {
+        return -1;
+    }
+    FILE* fp = fopen(file_name_.c_str(), "rb");
+    if (!fp) {
+        return -1;
+    }
+    _fseeki64(fp, 0, SEEK_END);
+    int64_t len = _ftelli64(fp);
+    fclose(fp);
+    return len;
 }
 

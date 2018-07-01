@@ -39,16 +39,10 @@
     <ClCompile Include="FileProcess.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="demux\demuxer.c">
-      <Filter>demux</Filter>
-    </ClCompile>
     <ClCompile Include="IBaseProcess.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Global\GlobalConfig.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="mux\muxer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="aes128\aes128.c">
@@ -61,9 +55,6 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="demux\demuxer.h">
-      <Filter>demux</Filter>
-    </ClInclude>
     <ClInclude Include="IBaseProcess.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -71,9 +62,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Global\Log.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mux\muxer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="aes128\aes128.h">

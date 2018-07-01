@@ -1,5 +1,4 @@
 #include "FileProcess.h"
-#include "demux/demuxer.h"
 #include "IBaseProcess.h"
 #include <QFileDialog>
 #include <QMessageBox>
@@ -10,17 +9,27 @@ FileProcess::FileProcess(QWidget *parent)
     , _base_process_ptr(new IBaseProcess)
 {
     ui.setupUi(this);
-    demuxer_init_ffmpeg();
 
-    // Debug
-    //demuxer_init_ffmpeg();
-    //_base_process_ptr = make_shared<IBaseProcess>();
-
-    //_base_process_ptr->OpenFile("D:\\1\\1.mp4");
-    //vector<string> child_file_name_vec;
-    //_base_process_ptr->StartSlice(4, child_file_name_vec);
-
+    // 分块测试
     ProcessDirectory();
+    //return;
+
+    // 合并文件测试
+    list<string> public_file_list = {
+        "D:/2/VID_20180626_193222.mp4_public_1",
+        "D:/2/VID_20180626_193222.mp4_public_2",
+        "D:/2/VID_20180626_193222.mp4_public_3",
+        "D:/2/VID_20180626_193222.mp4_public_4",
+        "D:/2/VID_20180626_193222.mp4_public_5",
+        "D:/2/VID_20180626_193222.mp4_public_6",
+        "D:/2/VID_20180626_193222.mp4_public_7",
+        "D:/2/VID_20180626_193222.mp4_public_8",
+        "D:/2/VID_20180626_193222.mp4_public_9"
+    };
+    string dest_file;
+    _base_process_ptr->MegerFile("D:/2/VID_20180626_193222.mp4_private", public_file_list,
+        "D:/2/", dest_file);
+    dest_file.clear();
 }
 
 FileProcess::~FileProcess()
@@ -45,7 +54,7 @@ int FileProcess::ProcessDirectory()
                 select_path.toStdString(), 
                 itor, 
                 "D:/2", 
-                5, 
+                9, 
                 private_file_name, 
                 publish_file_name_list
             );

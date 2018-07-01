@@ -1,5 +1,4 @@
 #pragma once
-#include "demux/demuxer.h"
 #include "Global/GlobalConfig.h"
 extern "C" {
 #include "aes128/aes128.h"
@@ -160,7 +159,6 @@ protected:
 
 
 protected:
-    demuxer_t*  _ffmpeg_demux_ptr = nullptr;
     string      _file_name;
     string      _key;
 };

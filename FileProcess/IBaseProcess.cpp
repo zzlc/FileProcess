@@ -8,10 +8,6 @@ IBaseProcess::IBaseProcess()
 
 IBaseProcess::~IBaseProcess()
 {
-    if (_ffmpeg_demux_ptr) {
-        demuxer_close_file(_ffmpeg_demux_ptr);
-        _ffmpeg_demux_ptr = NULL;
-    }
 }
 
 int IBaseProcess::SliceFile(const string& src_path_, const string& src_file_name_,
@@ -29,16 +25,7 @@ int IBaseProcess::SliceFile(const string& src_path_, const string& src_file_name
         LOGGER->error("{} file:{} not exit!", __FUNCTION__, absolute_path);
         return -1;
     }
-    if (_ffmpeg_demux_ptr) {
-        demuxer_close_file(_ffmpeg_demux_ptr);
-        _ffmpeg_demux_ptr = nullptr;
-    }
-    _ffmpeg_demux_ptr = demuxer_open_file(absolute_path);
-    if (!_ffmpeg_demux_ptr) {
-        LOGGER->error("{} demuxer_open_file failed!", __FUNCTION__);
-        return -1;
-    }
-    _file_name = src_file_name_;
+    _file_name = src_path_ + "/" + src_file_name_;
 
     if (GenerateChildFileName(src_path_, src_file_name_, 
         dest_path_, slice_count_, 
@@ -46,95 +33,75 @@ int IBaseProcess::SliceFile(const string& src_path_, const string& src_file_name
         LOGGER->error("{} Generate child file name failed!", __FUNCTION__);
         return -1;
     }
-    // 私有块
-    shared_ptr<SliceFileInfo> private_slice_ptr =
-        make_shared<SliceFileInfo>((char *)private_child_file_name.c_str(), 5 * 1024 * 1024);
-    // 公有块
-    vector<shared_ptr<SliceFileInfo>> public_slice_vec;
-    for (auto&& itor : publish_child_file_name_list_) {
-        public_slice_vec.push_back(
-            make_shared<SliceFileInfo>((char *)itor.c_str(), 5 * 1024 * 1024)
-        );
-    }
 
-    demuxer_avpacket_t* av_pkt_ptr = nullptr;
+    const int64_t file_length = GetFileSize(_file_name);
+    int harf_header_size = file_length * private_file_percent;
+    int key_frame_encrypt_header_len = 1024; // 加密头部长度
 
-    // 首先读取第一帧数据，然后获取 metadata
-    av_pkt_ptr = demuxer_read_next_packet(_ffmpeg_demux_ptr);
-    if (!av_pkt_ptr) {
-        LOGGER->warn("{} none av packet!", __FUNCTION__);
-        return -1;
-    }
-    int key_frame_encrypt_header_len = 1024; // 关键帧加密头部长度
-
-    // 获取文件头部数据，并写入私有块
-    FILE* tmp_fp = fopen(absolute_path, "rb");
-    if (!tmp_fp) {
+    // 打开源文件
+    shared_ptr<FILE> source_file_ptr(fopen(_file_name.c_str(), "rb"),
+        [](FILE *fp) {if (fp) fclose(fp); });
+    if (!source_file_ptr) {
         LOGGER->error("{} {} Open file to get metadata failed!", __FUNCTION__, __LINE__);
         return -1;
     }
 
-    string tmp_src_data;
-    tmp_src_data.resize(1024 * 1024);
-    int tmp_len(0), ret(0);
-    uint64_t tmp_byte_count(0);
-    string tmp_header((char *)av_pkt_ptr->data, 128);
-    while ((tmp_len = fread((char *)tmp_src_data.data(), 1, 1024 * 1024, tmp_fp)) > 0)
-    {
-        // 只比较前 128 个字节即可
-        ret = tmp_src_data.find(string((char *)av_pkt_ptr->data, 128));
-        if (ret != tmp_src_data.npos) {
-            tmp_byte_count += ret;
-            private_slice_ptr->SetData((uint8_t *)tmp_src_data.data(), ret);
-            break;
-        }
-        tmp_byte_count += tmp_len;
-        private_slice_ptr->SetData((uint8_t *)tmp_src_data.data(), tmp_len);
+    // 私有块
+    shared_ptr<SliceFileInfo> private_slice_ptr =
+        make_shared<SliceFileInfo>((char *)private_child_file_name.c_str(), block_size);
+    // 公有块
+    vector<shared_ptr<SliceFileInfo>> public_slice_vec;
+    for (auto&& itor : publish_child_file_name_list_) {
+        public_slice_vec.push_back(
+            make_shared<SliceFileInfo>((char *)itor.c_str(), block_size)
+        );
     }
-    // 文件头查找 & 写入完毕，关闭临时文件 tmp_fp
-    fclose(tmp_fp);
 
-    // 继续写入数据
-    int public_index(0), current_size(0);
-    const int max_buffer_size = 5 * 1024 * 1024; // 最大一次写入 5MB
-    uint8_t* buffer = (uint8_t *)malloc(max_buffer_size);
-    while ((av_pkt_ptr = demuxer_read_next_packet(_ffmpeg_demux_ptr)) != NULL) {
-        if (av_pkt_ptr->stream_index == _ffmpeg_demux_ptr->video_stream_index
-            && 1 == av_pkt_ptr->flags) {
-            // 已缓冲旧数据先写入 publish 块
-            public_slice_vec[public_index++]->SetData(buffer, current_size);
-            current_size = 0;
+    // 初始化读写文件的变量
+    shared_ptr<uint8_t> read_buffer((uint8_t *)malloc(block_size),
+        [](uint8_t *ptr) {free(ptr); });
+    int read_length(0);
+    int64_t rest_size(harf_header_size);
 
-            // 几个公有块轮流去写
-            if (public_index >= public_slice_vec.size()) {
-                public_index = 0;
-            }
-
-            // 关键帧写入私有数据块
-            private_slice_ptr->SetData(av_pkt_ptr->data, av_pkt_ptr->limit_size);
+    // 获取文件头，并写入私有块
+    while (rest_size > 0) {
+        if (rest_size >= block_size) {
+            read_length = fread(read_buffer.get(), 1, block_size, source_file_ptr.get());
         } else {
-            if (current_size + av_pkt_ptr->limit_size > max_buffer_size) {
-                public_slice_vec[public_index++]->SetData(buffer, current_size);
-                current_size = 0;
-            }
-            memcpy(buffer + current_size, av_pkt_ptr->data, av_pkt_ptr->limit_size);
-            current_size += av_pkt_ptr->limit_size;
-
-            // 几个公有块轮流去写
-            if (public_index >= public_slice_vec.size()) {
-                public_index = 0;
-            }
+            read_length = fread(read_buffer.get(), 1, rest_size, source_file_ptr.get());
         }
-        tmp_byte_count += av_pkt_ptr->limit_size;
+        rest_size -= read_length;
+        private_slice_ptr->SetData(read_buffer.get(), read_length);
     }
 
-    demuxer_close_file(_ffmpeg_demux_ptr);
-    _ffmpeg_demux_ptr = NULL;
-
-    if (buffer) {
-        free(buffer);
+    // 继续写入公有块数据
+    int public_index(0), current_size(0);
+    rest_size = file_length - harf_header_size;
+    while ((read_length = fread(read_buffer.get(), 1, block_size, source_file_ptr.get())) > 0) {
+        if (rest_size - read_length < harf_header_size) {
+            // 要留下 harf_header_size 大小的数据量用于写入私有块
+            public_slice_vec[public_index++]->SetData(read_buffer.get(), rest_size - harf_header_size);
+            private_slice_ptr->SetData(
+                read_buffer.get() + rest_size - harf_header_size, 
+                read_length - rest_size + harf_header_size
+            );
+            // 读取剩余的数据，并写入私有块
+            while ((read_length = fread(read_buffer.get(), 1, block_size, source_file_ptr.get())) > 0) {
+                private_slice_ptr->SetData(
+                    read_buffer.get(),
+                    read_length
+                );
+            }
+            //文件读取完毕
+            break;
+        } else {
+            public_slice_vec[public_index++]->SetData(read_buffer.get(), read_length);
+        }
+        if (public_index >= slice_count_) {
+            public_index = 0;
+        }
+        rest_size -= read_length;
     }
-
     LOGGER->info("{} open media file:{} success.", __FUNCTION__, src_file_name_);
     return 0;
 }
@@ -169,20 +136,18 @@ int IBaseProcess::MegerFile(
         }
     }
     // 生成目标文件的名称
-    char tmp_name_buf[MAX_PATH] = { 0 };
-    int file_index(0);
-    int ret = sscanf(src_public_file_name_list_.front().c_str(), "%s_public_%d", tmp_name_buf, &file_index);
-    if (ret <= 0) {
-        LOGGER->error("{} format file name failed!", __FUNCTION__);
-        return -1;
-    }
-    string dest_name = dest_path_ + tmp_name_buf;
+    int last_pos1 = src_public_file_name_list_.front().find_last_of('/');
+    int last_pos2 = src_public_file_name_list_.front().find("_public_");
+    string dest_name = src_public_file_name_list_.front().substr(last_pos1 + 1, last_pos2 - last_pos1 - 1);
     LOGGER->info("{} Gererate dest file name:{} success.", __FUNCTION__, dest_name);
     FILE* dest_fp = fopen(dest_name.c_str(), "wb");
     if (!dest_fp) {
         LOGGER->error("{} open dest file:{} to write failed!", __FUNCTION__, dest_name);
         return -1;
     }
+
+    int64_t private_file_size = GetFileSize(src_private_file_name_);
+
     // 开始循序读取数据块，并写入文件
     shared_ptr<FILE> private_fp_ptr(fopen(src_private_file_name_.c_str(), "rb"), 
         [](FILE* fp) {
@@ -192,14 +157,16 @@ int IBaseProcess::MegerFile(
     vector<shared_ptr<FILE>> public_fp_vec;
     for (auto&& itor : src_public_file_name_list_) {
         public_fp_vec.emplace_back(
-            fopen(src_private_file_name_.c_str(), "rb"), [](FILE* fp) {
+            fopen(itor.c_str(), "rb"), [](FILE* fp) {
             if (fp)
                 fclose(fp);
         }
         );
     }
-    int tmp_length(0), read_length(0);
-    uint8_t* read_buffer = (uint8_t*)malloc(5 * 1024 * 1024);
+
+    // 读取并写入私有块的前一半
+    int tmp_length(0), read_length(0), read_count(0), ret(0);
+    uint8_t* read_buffer = (uint8_t*)malloc(block_size);
     do 
     {
         read_length = fread((void *)&tmp_length, 1, sizeof(int), private_fp_ptr.get());
@@ -207,18 +174,65 @@ int IBaseProcess::MegerFile(
             LOGGER->warn("{} line {} private file end!", __FUNCTION__, __LINE__);
             break;
         }
+        read_count += tmp_length;
+        if (read_count > private_file_size / 2) {
+            ret = fseek(private_fp_ptr.get(), 0 - sizeof(int), SEEK_CUR);
+            break;
+        }
+
         read_length = fread(read_buffer, 1, tmp_length, private_fp_ptr.get());
+        if (read_length > 0) {
+            fwrite(read_buffer, 1, read_length, dest_fp);
+        }
     } while (true);
+
+    // 循环读取公有块，并写入
+    bool flag = false;
+    do 
+    {
+        flag = false;
+        for (auto&& itor : public_fp_vec) {
+            read_length = fread((void *)&tmp_length, 1, sizeof(int), itor.get());
+            if (read_length < sizeof(int)) {
+                LOGGER->warn("{} line {} public file end!", __FUNCTION__, __LINE__);
+                break;
+            }
+            read_length = fread(read_buffer, 1, tmp_length, itor.get());
+            if (read_length != tmp_length) {
+                LOGGER->warn("{} length exception!", __FUNCTION__);
+                break;
+            }
+            if (read_length > 0) {
+                fwrite(read_buffer, 1, read_length, dest_fp);
+                flag = true;
+            }
+        }
+        if (!flag) {
+            break;
+        }
+    } while (true);
+
+    // 继续写入私有块的后半块
+    do {
+        read_length = fread((void *)&tmp_length, 1, sizeof(int), private_fp_ptr.get());
+        if (read_length < sizeof(int)) {
+            LOGGER->warn("{} line {} private file end!", __FUNCTION__, __LINE__);
+            break;
+        }
+        read_count += tmp_length;
+        read_length = fread(read_buffer, 1, tmp_length, private_fp_ptr.get());
+        if (read_length > 0) {
+            fwrite(read_buffer, 1, read_length, dest_fp);
+        }
+    } while (true);
+
+    fclose(dest_fp);
+    free(read_buffer);
 }
 
 int IBaseProcess::CloseFile()
 {
     LOGGER->info("{} ", __FUNCTION__);
-    if (_ffmpeg_demux_ptr) {
-        demuxer_close_file(_ffmpeg_demux_ptr);
-        _ffmpeg_demux_ptr = nullptr;
-        return 0;
-    }
     return 1;
 }
 

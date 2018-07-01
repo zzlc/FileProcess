@@ -129,12 +129,10 @@ copy $(ProjectDir)$(Platform)\$(Configuration)\$(TargetName).pdb $(ProjectDir)bi
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="aes128\aes128.c" />
-    <ClCompile Include="demux\demuxer.c" />
     <ClCompile Include="FileProcess.cpp" />
     <ClCompile Include="Global\GlobalConfig.cpp" />
     <ClCompile Include="IBaseProcess.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="mux\muxer.c" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="FileProcess.h" />
@@ -148,11 +146,9 @@ copy $(ProjectDir)$(Platform)\$(Configuration)\$(TargetName).pdb $(ProjectDir)bi
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aes128\aes128.h" />
-    <ClInclude Include="demux\demuxer.h" />
     <ClInclude Include="Global\GlobalConfig.h" />
     <ClInclude Include="IBaseProcess.h" />
     <ClInclude Include="Global\Log.h" />
-    <ClInclude Include="mux\muxer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
