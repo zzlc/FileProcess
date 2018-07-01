@@ -11,7 +11,8 @@ IBaseProcess::~IBaseProcess()
 }
 
 int IBaseProcess::SliceFile(const string& src_path_, const string& src_file_name_,
-    const string& dest_path_, int slice_count_, __out string& private_child_file_name,
+    const string& dest_path_, int slice_count_, char* aes_key_,
+    __out string& private_child_file_name,
     __out list<string>& publish_child_file_name_list_)
 {
     LOGGER->info("{} open file:{}, {}, dest_path:{}, slice count:{}", 
@@ -48,12 +49,12 @@ int IBaseProcess::SliceFile(const string& src_path_, const string& src_file_name
 
     // 私有块
     shared_ptr<SliceFileInfo> private_slice_ptr =
-        make_shared<SliceFileInfo>((char *)private_child_file_name.c_str(), block_size);
+        make_shared<SliceFileInfo>((char *)private_child_file_name.c_str(), block_size, aes_key_);
     // 公有块
     vector<shared_ptr<SliceFileInfo>> public_slice_vec;
     for (auto&& itor : publish_child_file_name_list_) {
         public_slice_vec.push_back(
-            make_shared<SliceFileInfo>((char *)itor.c_str(), block_size)
+            make_shared<SliceFileInfo>((char *)itor.c_str(), block_size, aes_key_)
         );
     }
 
@@ -73,6 +74,7 @@ int IBaseProcess::SliceFile(const string& src_path_, const string& src_file_name
         rest_size -= read_length;
         private_slice_ptr->SetData(read_buffer.get(), read_length);
     }
+    GLOBALCONFIG->SetChildProgress(private_file_percent);
 
     // 继续写入公有块数据
     int public_index(0), current_size(0);
@@ -101,7 +103,11 @@ int IBaseProcess::SliceFile(const string& src_path_, const string& src_file_name
             public_index = 0;
         }
         rest_size -= read_length;
+
+        GLOBALCONFIG->SetChildProgress(1.0f - 1.0f * rest_size / file_length);
     }
+    GLOBALCONFIG->SetChildProgress(1.0f);
+
     LOGGER->info("{} open media file:{} success.", __FUNCTION__, src_file_name_);
     return 0;
 }
@@ -138,7 +144,7 @@ int IBaseProcess::MegerFile(
     // 生成目标文件的名称
     int last_pos1 = src_public_file_name_list_.front().find_last_of('/');
     int last_pos2 = src_public_file_name_list_.front().find("_public_");
-    string dest_name = src_public_file_name_list_.front().substr(last_pos1 + 1, last_pos2 - last_pos1 - 1);
+    string dest_name = dest_path_ + "/" + src_public_file_name_list_.front().substr(last_pos1 + 1, last_pos2 - last_pos1 - 1);
     LOGGER->info("{} Gererate dest file name:{} success.", __FUNCTION__, dest_name);
     FILE* dest_fp = fopen(dest_name.c_str(), "wb");
     if (!dest_fp) {

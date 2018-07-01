@@ -26,13 +26,28 @@ CGlobalConfig* CGlobalConfig::Instance()
 void CGlobalConfig::SetAES128Key(const char* key_)
 {
     LOGGER->info("{} Set new aes128 key:{}, old key:{}",
-        __FUNCTION__, key_, _aes128_key);
-    _aes128_key = key_;
+        __FUNCTION__, (char*)key_, (char*)_aes128_key);
+    if (!key_) {
+        return;
+    }
+    memcpy(_aes128_key, key_, sizeof(_aes128_key));
 }
 
-const char* CGlobalConfig::GetAES128Key()
+char* CGlobalConfig::GetAES128Key()
 {
-    return _aes128_key.c_str();
+    return (char *)_aes128_key;
+}
+
+void CGlobalConfig::SetCurrentFileName(const string& file_name_)
+{
+    lock_guard<mutex> lock_(_mutex);
+    _current_file_name = file_name_;
+}
+
+const std::string& CGlobalConfig::GetCurrentFileName()
+{
+    lock_guard<mutex> lock_(_mutex);
+    return _current_file_name;
 }
 
 std::wstring utf8_to_wstring(const std::string& utf8_str_)

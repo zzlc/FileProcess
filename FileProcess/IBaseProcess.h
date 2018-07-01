@@ -1,5 +1,6 @@
 #pragma once
 #include "Global/GlobalConfig.h"
+#include <QObject>
 extern "C" {
 #include "aes128/aes128.h"
 }
@@ -16,10 +17,14 @@ struct SliceFileInfo
     atomic_bool update_flag      = false;
     bool exit_flag               = false;
     thread write_thread;
-    char *key                    = "0f1571c947d9e859abb7add6af7f6798";
+    char key[16]                 = { 0 };
     int password[4][4]           = { 0 };
+    string  file_name;
 
-    SliceFileInfo(char* file_name_, int buffer_size_) {
+    SliceFileInfo(char* file_name_, int buffer_size_, char* aes_key_) {
+        memcpy(key, aes_key_, sizeof(key));
+        file_name = file_name_;
+
         errno_t ret = fopen_s(&fp, file_name_, "wb");
         if (0 != ret) {
             LOGGER->warn("{} open file:%s failed, errno:{}", __FUNCTION__, file_name_, ret);
@@ -117,8 +122,9 @@ protected:
     SliceFileInfo operator = (const SliceFileInfo&) = delete;
 };
 
-class IBaseProcess
+class IBaseProcess : public QObject
 {
+    Q_OBJECT
 public:
     IBaseProcess();
     virtual ~IBaseProcess();
@@ -129,6 +135,7 @@ public:
         const string& src_file_name_, 
         const string& dest_path_,
         int slice_count_, 
+        char* aes_key_,
         __out string& private_child_file_name,
         __out list<string>& publish_child_file_name_list_
     );

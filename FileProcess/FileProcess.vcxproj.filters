@@ -53,11 +53,11 @@
     <QtMoc Include="FileProcess.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="IBaseProcess.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="IBaseProcess.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Global\GlobalConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>

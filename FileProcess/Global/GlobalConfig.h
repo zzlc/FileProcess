@@ -35,7 +35,35 @@ public:
     static CGlobalConfig* Instance();
 
     void        SetAES128Key(const char* key_);
-    const char* GetAES128Key();
+    char*       GetAES128Key();
+
+    void        SetFileCount(const int& file_count_) {
+        _file_count.store(file_count_);
+    }
+    int         GetFileCount() {
+        return _file_count.load();
+    }
+    void        SetCurrentFileIndex(const int& index_) {
+        _current_file_index = index_;
+    }
+    int         GetCurrentFileIndex() {
+        return _current_file_index.load();
+    }
+    void        SetCurrentFileName(const string& file_name_);
+    const string& GetCurrentFileName();
+
+    void        SetTotalProgress(float progress_) {
+        _total_progress = progress_;
+    }
+    float       GetTotalProgress() {
+        return _total_progress;
+    }
+    void        SetChildProgress(float progress_) {
+        _child_progress = progress_;
+    }
+    float       GetChildProgress() {
+        return _child_progress;
+    }
 
 protected:
     CGlobalConfig();
@@ -47,8 +75,16 @@ protected:
     static CGlobalConfig* _global_config_ptr;
 
 private:
-    string _aes128_key = "0f1571c947d9e859abb7add6af7f6798";
+    char            _aes128_key[16] = { 0 };
+    mutex           _mutex;
+    atomic_int      _file_count = 0;
+    atomic_int      _current_file_index = 0;
+    string          _current_file_name;    //正在处理中的文件名
+    atomic<float>   _total_progress = 0.0f;
+    atomic<float>   _child_progress = 0.0f;
 };
+
+#define  GLOBALCONFIG CGlobalConfig::Instance()
 
 extern std::wstring    utf8_to_wstring(const std::string& utf8_str_);
 extern std::string     wstring_to_utf8(const std::wstring& wstr_);
