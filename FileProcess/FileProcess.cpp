@@ -80,6 +80,7 @@ int FileProcess::SliceProcessDirectory(char* aes_key_, const int& slice_count_,
                     dest_dir,
                     slice_count_,
                     aes_key_,
+                    GLOBALCONFIG->CreateUUID(),
                     dest_private_file_name,
                     dest_public_file_name_list
                 );
@@ -116,6 +117,14 @@ int FileProcess::MergeProcessDirectory(char* aes_key_, bool use_src_dir_)
     for (auto&& itor : public_file_name_list) {
         public_file_list.push_back(itor.toStdString());
     }
+
+    // 通过 UUID 检查是否为同一文件来源
+    if (!CheckFiles(private_file_name.toStdString(), public_file_list)) {
+        LOGGER->warn("{} CheckFiles failed!", __FUNCTION__);
+        QMessageBox::warning(nullptr, tr("文件 UUID 校验失败！"), tr("错误："));
+        return -1;
+    }
+
     _merge_thread = std::thread([=]() {
         string dest_file_name;
         _base_process_ptr->MegerFile(
@@ -129,6 +138,73 @@ int FileProcess::MergeProcessDirectory(char* aes_key_, bool use_src_dir_)
     LOGGER->info("{} End", __FUNCTION__);
     return 0;
 
+}
+
+bool FileProcess::CheckFiles(const string& private_file_name_, const list<string>& public_file_list_)
+{
+    if (private_file_name_.empty() || public_file_list_.empty()) {
+        LOGGER->warn("{} private file:{} ,public file count:{} ,params error!",
+            __FUNCTION__, private_file_name_, public_file_list_.size());
+        return false;
+    }
+    // check exist?
+    if (!FileExist(private_file_name_)) {
+        LOGGER->warn("{} file:{} not exist!", __FUNCTION__, private_file_name_);
+        return false;
+    }
+    for (auto && itor : public_file_list_) {
+        if (!FileExist(itor)) {
+            LOGGER->warn("{} file:{} not exist!", __FUNCTION__, private_file_name_);
+            return false;
+        }
+    }
+    FILE *tmp_fp = NULL;
+    uint8_t tmp_buffer[16] = { 0 };
+    string uuid_str;
+    errno_t ret = fopen_s(&tmp_fp, private_file_name_.c_str(), "rb");
+    if (ret != 0) {
+        LOGGER->warn("{} file:{} open failed!", __FUNCTION__, private_file_name_);
+        return false;
+    }
+    if (0 != _fseeki64(tmp_fp, -16LL, SEEK_END)) {
+        LOGGER->warn("{} seek file:{} failed!", __FUNCTION__, private_file_name_);
+        fclose(tmp_fp);
+        return false;
+    }
+    ret = fread(tmp_buffer, 1, sizeof(tmp_buffer), tmp_fp);
+    if (ret != sizeof(tmp_buffer)) {
+        LOGGER->warn("{} read file:{} failed!", __FUNCTION__, private_file_name_);
+        fclose(tmp_fp);
+        return false;
+    }
+    uuid_str.append((char *)tmp_buffer, ret);
+    fclose(tmp_fp);
+
+    // 检查公有块 UUID 是否与私有块一致
+    for (auto&& itor : public_file_list_) {
+        shared_ptr<FILE> fp_ptr(fopen(itor.c_str(), "rb"), [](FILE* fp) { fclose(fp); });
+        if (!fp_ptr) {
+            LOGGER->warn("{} open file:{} failed!", __FUNCTION__, itor);
+            return false;
+        }
+        if (0 != _fseeki64(fp_ptr.get(), -16LL, SEEK_END)) {
+            LOGGER->warn("{} seek file:{} failed!", __FUNCTION__, itor);
+            fclose(tmp_fp);
+            return false;
+        }
+        ret = fread(fp_ptr.get(), 1, sizeof(tmp_buffer), tmp_fp);
+        if (ret != sizeof(tmp_buffer)) {
+            LOGGER->warn("{} read file:{} failed!", __FUNCTION__, itor);
+            fclose(tmp_fp);
+            return false;
+        }
+        string tmp_uuid((char *)tmp_buffer, ret);
+        if (uuid_str.compare(tmp_uuid) != 0) {
+            LOGGER->warn("{} file:{} uuid not equal private uuid!", __FUNCTION__, itor);
+            return false;
+        }
+    }
+    return true;
 }
 
 QString FileProcess::SelectFile(const QString& dlg_title_)

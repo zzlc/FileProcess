@@ -136,6 +136,7 @@ public:
         const string& dest_path_,
         int slice_count_, 
         char* aes_key_,
+        const string& uuid_,
         __out string& private_child_file_name,
         __out list<string>& publish_child_file_name_list_
     );
@@ -160,6 +161,7 @@ protected:
         const string& src_file_name_,
         const string& dest_path_,
         int slice_count_,
+        const string& uuid_str_,
         __out string& private_child_file_name,
         __out list<string>& publish_child_file_name_list_
     );

@@ -6,6 +6,7 @@
 #include <list>
 #include <future>
 #include <chrono>
+#include <QUuid>
 #include "Log.h"
 
 using namespace std;
@@ -64,6 +65,8 @@ public:
     float       GetChildProgress() {
         return _child_progress;
     }
+
+    string      CreateUUID();
 
 protected:
     CGlobalConfig();

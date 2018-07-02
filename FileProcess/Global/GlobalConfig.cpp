@@ -50,6 +50,12 @@ const std::string& CGlobalConfig::GetCurrentFileName()
     return _current_file_name;
 }
 
+std::string CGlobalConfig::CreateUUID()
+{
+    QUuid uid = QUuid::createUuid();
+    return uid.toString().remove("{").remove("}").remove("-").toStdString();
+}
+
 std::wstring utf8_to_wstring(const std::string& utf8_str_)
 {
     int unicodeLen = ::MultiByteToWideChar(CP_UTF8, 0, utf8_str_.c_str(), utf8_str_.size(), NULL, 0);

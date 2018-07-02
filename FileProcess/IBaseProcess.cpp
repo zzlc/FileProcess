@@ -12,11 +12,12 @@ IBaseProcess::~IBaseProcess()
 
 int IBaseProcess::SliceFile(const string& src_path_, const string& src_file_name_,
     const string& dest_path_, int slice_count_, char* aes_key_,
+    const string& uuid_,
     __out string& private_child_file_name,
     __out list<string>& publish_child_file_name_list_)
 {
-    LOGGER->info("{} open file:{}, {}, dest_path:{}, slice count:{}", 
-        __FUNCTION__, src_path_, src_file_name_, dest_path_, slice_count_);
+    LOGGER->info("{} open file:{}, {}, dest_path:{}, slice count:{}, uuid:{}", 
+        __FUNCTION__, src_path_, src_file_name_, dest_path_, slice_count_, uuid_);
     if (src_path_.empty() || src_file_name_.empty() || slice_count_ <= 1) {
         return -1;
     }
@@ -29,7 +30,7 @@ int IBaseProcess::SliceFile(const string& src_path_, const string& src_file_name
     _file_name = src_path_ + "/" + src_file_name_;
 
     if (GenerateChildFileName(src_path_, src_file_name_, 
-        dest_path_, slice_count_, 
+        dest_path_, slice_count_, uuid_,
         private_child_file_name, publish_child_file_name_list_) < 0) {
         LOGGER->error("{} Generate child file name failed!", __FUNCTION__);
         return -1;
@@ -108,6 +109,12 @@ int IBaseProcess::SliceFile(const string& src_path_, const string& src_file_name
     }
     GLOBALCONFIG->SetChildProgress(1.0f);
 
+    // 统一写入 uuid
+    private_slice_ptr->SetData((uint8_t *)uuid_.data(), uuid_.size());
+    for (auto&& itor : public_slice_vec) {
+        itor->SetData((uint8_t *)uuid_.data(), uuid_.size());
+    }
+
     LOGGER->info("{} open media file:{} success.", __FUNCTION__, src_file_name_);
     return 0;
 }
@@ -143,7 +150,7 @@ int IBaseProcess::MegerFile(
     }
     // 生成目标文件的名称
     int last_pos1 = src_public_file_name_list_.front().find_last_of('/');
-    int last_pos2 = src_public_file_name_list_.front().find("_public_");
+    int last_pos2 = src_public_file_name_list_.front().find("_pub_");
     string dest_name = dest_path_ + "/" + src_public_file_name_list_.front().substr(last_pos1 + 1, last_pos2 - last_pos1 - 1);
     LOGGER->info("{} Gererate dest file name:{} success.", __FUNCTION__, dest_name);
     FILE* dest_fp = fopen(dest_name.c_str(), "wb");
@@ -208,6 +215,17 @@ int IBaseProcess::MegerFile(
                 LOGGER->warn("{} length exception!", __FUNCTION__);
                 break;
             }
+            // 判断是否是 UUID
+            if (32 == read_length) {
+                char c = fgetc(itor.get());
+                if (feof(itor.get())) {
+                    // 此文件结束了，后面的 UUID 不要写入
+                    continue;
+                } else {
+                    fseek(itor.get(), -1, SEEK_CUR);
+                }
+            }
+
             if (read_length > 0) {
                 fwrite(read_buffer, 1, read_length, dest_fp);
                 flag = true;
@@ -225,8 +243,16 @@ int IBaseProcess::MegerFile(
             LOGGER->warn("{} line {} private file end!", __FUNCTION__, __LINE__);
             break;
         }
-        read_count += tmp_length;
         read_length = fread(read_buffer, 1, tmp_length, private_fp_ptr.get());
+        if (32 == read_length) {
+            char c = fgetc(private_fp_ptr.get());
+            if (feof(private_fp_ptr.get())) {
+                // 此文件结束了，后面的 UUID 不要写入
+                continue;
+            } else {
+                fseek(private_fp_ptr.get(), -1, SEEK_CUR);
+            }
+        }
         if (read_length > 0) {
             fwrite(read_buffer, 1, read_length, dest_fp);
         }
@@ -245,6 +271,7 @@ int IBaseProcess::CloseFile()
 int IBaseProcess::GenerateChildFileName(
     const string& src_path_, const string& src_file_name_, 
     const string& dest_path_, int slice_count_, 
+    const string& uuid_str_,
     __out string& private_child_file_name, __out list<string>& publish_child_file_name_list_)
 {
     if (src_file_name_.empty() || slice_count_ <= 0) {
@@ -253,13 +280,14 @@ int IBaseProcess::GenerateChildFileName(
         return -1;
     }
     char buffer[MAX_PATH] = { 0 };
-    int len = snprintf(buffer, MAX_PATH, "%s/%s_private", dest_path_.c_str(), src_file_name_.c_str());
+    int len = snprintf(buffer, MAX_PATH, "%s/%s_pri_%s", 
+        dest_path_.c_str(), src_file_name_.c_str(), uuid_str_.c_str());
     private_child_file_name.clear();
     private_child_file_name.append(buffer, len);
     for (int i(1); i <= slice_count_; ++i) {
         memset(buffer, 0, MAX_PATH);
-        len = snprintf(buffer, MAX_PATH, "%s/%s_public_%d", 
-            dest_path_.c_str(), src_file_name_.c_str(), i);
+        len = snprintf(buffer, MAX_PATH, "%s/%s_pub_%s_%d", 
+            dest_path_.c_str(), src_file_name_.c_str(), uuid_str_.c_str(), i);
         publish_child_file_name_list_.emplace_back(string(buffer, len));
     }
     return 0;
