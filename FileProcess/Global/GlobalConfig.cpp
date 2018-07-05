@@ -23,19 +23,14 @@ CGlobalConfig* CGlobalConfig::Instance()
     return _global_config_ptr;
 }
 
-void CGlobalConfig::SetAES128Key(const char* key_)
+const uint8_t* CGlobalConfig::GetAES128Key()
 {
-    LOGGER->info("{} Set new aes128 key:{}, old key:{}",
-        __FUNCTION__, (char*)key_, (char*)_aes128_key);
-    if (!key_) {
-        return;
-    }
-    memcpy(_aes128_key, key_, sizeof(_aes128_key));
+    return (uint8_t *)_aes128_key;
 }
 
-char* CGlobalConfig::GetAES128Key()
+const uint8_t* CGlobalConfig::GetAES128Iv()
 {
-    return (char *)_aes128_key;
+    return (uint8_t*)_aes128_iv;
 }
 
 void CGlobalConfig::SetCurrentFileName(const string& file_name_)

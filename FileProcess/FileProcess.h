@@ -13,7 +13,7 @@ class FileProcess : public QMainWindow
     Q_OBJECT
 
 public:
-    FileProcess(QWidget *parent = Q_NULLPTR);
+    FileProcess(bool slice_, QWidget *parent = Q_NULLPTR);
     ~FileProcess();
 
     // 按照文件夹进行分块、加密处理，走流程
@@ -43,12 +43,12 @@ protected:
     QString     SelectDir(const QString& dlg_title_);
 
     // 遍历指定文件夹中所有文件
-    int         QueryDirectory(const string& path_, list<string>& dest_file_vec_);
+    int         QueryDirectory(const QString& path_, list<string>& dest_file_vec_);
 
 signals:
 
-public slots:
-    void        UpdateProgressSlot();
+    public slots :
+        void        UpdateProgressSlot();
 
 private:
     Ui::FileProcessClass ui;

@@ -1,10 +1,8 @@
 
 function getSelectFile() {
   var fileName = document.getElementById("fileSelect").value;
+  document.getElementById("executFileName").value = fileName;
   console.log("Select File:%s", fileName);
-  if (fileName.length > 0) {
-    alert(fileName);
-  }
 }
 
 function getSelectPath() {
@@ -23,13 +21,20 @@ function getDestPath(){
   alert(pathName)
 }
 
+// 启动分块任务
+function startSliceTask(filePath){
+  // var filePath = document.getElementById("SelectFileForm.fileName").value;
+  if (filePath == null || filePath == undefined || filePath == '') {
+    alert("必须指定客户端路径！")
+    return;
+  }
+  var WSH = new ActiveXObject("WScript.Shell");
+  WSH.Run(filePath);
+}
+
 window.onload = function () {
   // var x = "SelectFile", b;
   // (b = document.createElement("button")).innerHTML = "选择文件 Test";
   // b.setAttribute("onclick", "alert('" + x + "')");
   // document.body.appendChild(b);
-  var filePath = "path", destPath;
-  (destPath = document.createElement("button")).innerHTML = "启动文件处理客户端";
-  destPath.setAttribute("onclick", "getDestPath();");
-  document.body.appendChild(destPath);
 }

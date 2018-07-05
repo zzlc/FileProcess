@@ -19,12 +19,12 @@ FileProcess::FileProcess(bool slice_, QWidget *parent)
 
     setWindowFlags(windowFlags()& ~Qt::WindowMaximizeButtonHint);
     setFixedSize(this->width(), this->height());
-
+    
     if (slice_) {
-        // 分块测试 
+        // 分块测试
         SliceProcessDirectory((char *)GLOBALCONFIG->GetAES128Key(), 3, false);
     } else {
-        // 合并文件测试 
+        // 合并文件测试
         MergeProcessDirectory((char *)GLOBALCONFIG->GetAES128Key(), false);
     }
 
@@ -49,7 +49,7 @@ FileProcess::~FileProcess()
 int FileProcess::SliceProcessDirectory(char* aes_key_, const int& slice_count_,
     bool use_src_dir_)
 {
-    LOGGER->info("{} Start: aes key ptr:{}, slice_count:{}, use src dir:{}",
+    LOGGER->info("{} Start: aes key ptr:{}, slice_count:{}, use src dir:{}", 
         __FUNCTION__, (void*)aes_key_, slice_count_, use_src_dir_);
     QString src_dir = SelectDir(tr("选择源文件夹"));
     if (!src_dir.isEmpty()) {
@@ -59,13 +59,13 @@ int FileProcess::SliceProcessDirectory(char* aes_key_, const int& slice_count_,
             LOGGER->warn("{} path:{} nothing!", __FUNCTION__, src_dir.toStdString());
         }
 
-        // 确定目标文件夹，默认同原文件夹 
+        // 确定目标文件夹，默认同原文件夹
         string dest_dir = unicode_to_utf(src_dir.toStdWString());
         if (!use_src_dir_) {
             dest_dir = unicode_to_utf(SelectDir(tr("选择目标文件夹")).toStdWString());
         }
 
-        // 判断文件大小 
+        // 判断文件大小
         auto itor = file_name_list.begin();
         while (itor != file_name_list.end()) {
             int64_t file_length = GetFileSize(unicode_to_utf(src_dir.toStdWString()) + "/" + *itor);
@@ -119,7 +119,7 @@ int FileProcess::SliceProcessDirectory(char* aes_key_, const int& slice_count_,
 
 int FileProcess::MergeProcessDirectory(char* aes_key_, bool use_src_dir_)
 {
-    LOGGER->info("{} Start: aes key ptr:{}, use src dir:{}",
+    LOGGER->info("{} Start: aes key ptr:{}, use src dir:{}", 
         __FUNCTION__, (char *)aes_key_, use_src_dir_);
 
     QString private_file_name = SelectFile(tr("选择私有块文件"));
@@ -141,7 +141,7 @@ int FileProcess::MergeProcessDirectory(char* aes_key_, bool use_src_dir_)
         public_file_list.push_back(unicode_to_utf(itor.toStdWString()));
     }
 
-    // 通过 UUID 检查是否为同一文件来源 
+    // 通过 UUID 检查是否为同一文件来源
     if (!CheckFiles(unicode_to_utf(private_file_name.toStdWString()), public_file_list)) {
         LOGGER->warn("{} CheckFiles failed!", __FUNCTION__);
         QMessageBox::warning(nullptr, tr("文件 UUID 校验失败！"), tr("错误："));
@@ -156,7 +156,7 @@ int FileProcess::MergeProcessDirectory(char* aes_key_, bool use_src_dir_)
             aes_key_,
             unicode_to_utf(dest_path.toStdWString()),
             dest_file_name
-        );
+            );
     });
 
     LOGGER->info("{} End", __FUNCTION__);
@@ -204,7 +204,7 @@ bool FileProcess::CheckFiles(const string& private_file_name_, const list<string
     uuid_str.append((char *)tmp_buffer, ret);
     fclose(tmp_fp);
 
-    // 检查公有块 UUID 是否与私有块一致 
+    // 检查公有块 UUID 是否与私有块一致
     for (auto&& itor : public_file_list_) {
         shared_ptr<FILE> fp_ptr(fopen(itor.c_str(), "rb"), [](FILE* fp) { fclose(fp); });
         if (!fp_ptr) {
@@ -282,7 +282,7 @@ int FileProcess::QueryDirectory(const QString& path_, list<string>& dest_file_ve
     QFileInfoList file_list = dir.entryInfoList();
     for (auto&& itor : file_list) {
         dest_file_vec_.emplace_back(unicode_to_utf(itor.fileName().toStdWString()));
-        LOGGER->info("{} path:{} cantain file name:{}",
+        LOGGER->info("{} path:{} cantain file name:{}", 
             __FUNCTION__, unicode_to_utf(path_.toStdWString()), itor.fileName().toStdString());
     }
     LOGGER->flush();

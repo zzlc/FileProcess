@@ -35,8 +35,8 @@ public:
 
     static CGlobalConfig* Instance();
 
-    void        SetAES128Key(const char* key_);
-    char*       GetAES128Key();
+    const uint8_t* GetAES128Key();
+    const uint8_t* GetAES128Iv();
 
     void        SetFileCount(const int& file_count_) {
         _file_count.store(file_count_);
@@ -68,6 +68,10 @@ public:
 
     string      CreateUUID();
 
+    int         GetEncrySize() {
+        return _encry_size;
+    }
+
 protected:
     CGlobalConfig();
 
@@ -78,13 +82,15 @@ protected:
     static CGlobalConfig* _global_config_ptr;
 
 private:
-    char            _aes128_key[16] = { 0 };
+    const uint8_t   _aes128_key[16] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xde, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };
+    const uint8_t   _aes128_iv[16] = { 0xa1, 0xb2, 0xc3, 0xd4, 0xe5, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
     mutex           _mutex;
     atomic_int      _file_count = 0;
     atomic_int      _current_file_index = 0;
     string          _current_file_name;    //正在处理中的文件名
     atomic<float>   _total_progress = 0.0f;
     atomic<float>   _child_progress = 0.0f;
+    const int       _encry_size = 8 * 1024; //加密长度
 };
 
 #define  GLOBALCONFIG CGlobalConfig::Instance()

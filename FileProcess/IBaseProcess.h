@@ -2,28 +2,27 @@
 #include "Global/GlobalConfig.h"
 #include <QObject>
 extern "C" {
-#include "aes128/aes128.h"
+#include "aes128/aes.h"
 }
 
 struct SliceFileInfo
 {
     FILE* fp                     = nullptr;
     uint8_t* buffer              = nullptr;
-    uint8_t* encry_buffer        = nullptr;
-    int encry_size               = -1;       //加密长度；0：不加密；-1：全部加密；> 0:加密指定长度
+    int encry_size               = 0;        //加密长度；0：不加密；-1：全部加密；> 0:加密指定长度,必须为 16 的整倍数
     int max_buffer_size          = 0;        // buffer 缓冲区大小
     int payload_size             = 0;        // 目前缓冲区内有效数据长度
     mutex buffer_muter;
     atomic_bool update_flag      = false;
     bool exit_flag               = false;
     thread write_thread;
-    char key[16]                 = { 0 };
-    int password[4][4]           = { 0 };
+    struct AES_ctx  ctx;
     string  file_name;
 
     SliceFileInfo(char* file_name_, int buffer_size_, char* aes_key_) {
-        memcpy(key, aes_key_, sizeof(key));
         file_name = file_name_;
+        encry_size = GLOBALCONFIG->GetEncrySize();
+        AES_init_ctx_iv(&ctx, (uint8_t *)aes_key_, GLOBALCONFIG->GetAES128Iv());
 
         errno_t ret = fopen_s(&fp, file_name_, "wb");
         if (0 != ret) {
@@ -31,15 +30,8 @@ struct SliceFileInfo
         } else {
             max_buffer_size = buffer_size_;
             buffer          = (uint8_t *)malloc(buffer_size_);
-            encry_buffer    = (uint8_t *)malloc(1024);
         }
 
-        for (int m = 0; m < 4; ++m) {
-            for (int i = 0; i < 4; ++i) {
-                int indx = 4 * i + m;
-                password[i][m] = 16 * c2i(key[indx]) + c2i(key[indx + 1]);
-            }
-        }
         write_thread = thread(&SliceFileInfo::WriteThread, this);
     }
     ~SliceFileInfo() {
@@ -47,16 +39,13 @@ struct SliceFileInfo
         write_thread.join();
 
         if (fp) {
+            fflush(fp);
             fclose(fp);
             fp = nullptr;
         }
         if (buffer) {
             free(buffer);
             buffer = nullptr;
-        }
-        if (encry_buffer) {
-            free(encry_buffer);
-            encry_buffer = nullptr;
         }
     }
     int SetData(uint8_t* buffer_, const int& len_) {
@@ -85,29 +74,12 @@ struct SliceFileInfo
                     break;
                 }
                 //将文件转换成16字节的int型数组加密、解密
-                if (payload_size < 1024) {
+                if (payload_size < encry_size) {
                     fwrite((void *)&payload_size, 1, sizeof(payload_size), fp);
                     fwrite(buffer, 1, payload_size, fp);
                 } else {
-                    for (int i = 0; i < 1024 / 16; ++i) {
-
-                        int content_to_int[4][4];
-                        for (int j = 0; j < 4; ++j) {
-                            for (int k = 0; k < 4; ++k) {
-                                content_to_int[j][k] = buffer[j * 4 + k + 16 * i];
-                            }
-                        }
-                        aes_detail(content_to_int, password, 1);
-                        for (int j = 0; j < 4; ++j) {
-                            for (int k = 0; k < 4; ++k) {
-                                encry_buffer[j * 4 + k + 16 * i] = content_to_int[j][k];
-                            }
-                        }
-                    }
-                    // 先不加密
-                    //fwrite(encry_buffer, 1, 1024, fp);
-                    //fwrite(buffer + 1024, 1, payload_size - 1024, fp);
                     fwrite((char *)&payload_size, 1, sizeof(payload_size), fp);
+                    AES_CBC_encrypt_buffer(&ctx, buffer, encry_size);
                     fwrite(buffer, 1, payload_size, fp);
                 }
                 update_flag = false;
@@ -120,6 +92,39 @@ protected:
     SliceFileInfo() = delete;
     const SliceFileInfo(const SliceFileInfo&) = delete;
     SliceFileInfo operator = (const SliceFileInfo&) = delete;
+};
+
+struct MergeFileInfo {
+    FILE* fp = NULL;
+    int decrypt_size = 0;
+    struct AES_ctx  ctx;
+    MergeFileInfo(char* file_name_, uint8_t* aes_key_) {
+        decrypt_size = GLOBALCONFIG->GetEncrySize();
+        AES_init_ctx_iv(&ctx, (uint8_t *)aes_key_, GLOBALCONFIG->GetAES128Iv());
+
+        errno_t ret = fopen_s(&fp, file_name_, "rb");
+        if (0 != ret) {
+            fp = NULL;
+            LOGGER->warn("{} open file:%s failed, errno:{}", __FUNCTION__, file_name_, ret);
+        }
+    }
+    ~MergeFileInfo() {
+        if (fp) {
+            fclose(fp);
+            fp = NULL;
+        }
+    }
+    int ReadData(uint8_t* buffer_, const int& len_) {
+        if (!buffer_ || len_ <= 0 || !fp) {
+            return 0;
+        }
+        int ret = fread(buffer_, 1, len_, fp);
+        if (ret >= decrypt_size) {
+            // 解密
+            AES_CBC_decrypt_buffer(&ctx, buffer_, decrypt_size);
+        }
+        return ret;
+    }
 };
 
 class IBaseProcess : public QObject
@@ -142,9 +147,10 @@ public:
     );
 
     // 指定私有块和公有块文件进行合并，并输出目标文件
-    virtual int MegerFile(
+    virtual int MergeFile(
         const string& src_private_file_name_, 
         const list<string>& src_publish_file_name__list_,
+        char* aes_key_,
         const string& dest_path_, 
         __out string& dest_file_name_
     );
@@ -166,9 +172,10 @@ protected:
         __out list<string>& publish_child_file_name_list_
     );
 
+    void InitAesKey(const uint8_t* key_);
 
 protected:
     string      _file_name;
-    string      _key;
+    struct AES_ctx  ctx;
 };
 

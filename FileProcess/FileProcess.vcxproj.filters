@@ -45,7 +45,10 @@
     <ClCompile Include="Global\GlobalConfig.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="aes128\aes128.c">
+    <ClCompile Include="aes128\aes.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="aes128\test.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -64,7 +67,13 @@
     <ClInclude Include="Global\Log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="aes128\aes128.h">
+    <ClInclude Include="aes128\aes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="aes128\aes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\minidump.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

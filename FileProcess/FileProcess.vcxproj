@@ -103,7 +103,7 @@ copy $(ProjectDir)$(Platform)\$(Configuration)\$(TargetName).pdb $(ProjectDir)bi
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;$(ProjectDIr)3rd\ffmpeg\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>qtmain.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>LinkVerboseLib</ShowProgress>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
@@ -128,7 +128,8 @@ copy $(ProjectDir)$(Platform)\$(Configuration)\$(TargetName).pdb $(ProjectDir)bi
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="aes128\aes128.c" />
+    <ClCompile Include="aes128\aes.c" />
+    <ClCompile Include="aes128\test.c" />
     <ClCompile Include="FileProcess.cpp" />
     <ClCompile Include="Global\GlobalConfig.cpp" />
     <ClCompile Include="IBaseProcess.cpp" />
@@ -145,8 +146,10 @@ copy $(ProjectDir)$(Platform)\$(Configuration)\$(TargetName).pdb $(ProjectDir)bi
     <QtRcc Include="Resources\FileProcess.qrc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="aes128\aes128.h" />
+    <ClInclude Include="aes128\aes.h" />
+    <ClInclude Include="aes128\aes.hpp" />
     <ClInclude Include="Global\GlobalConfig.h" />
+    <ClInclude Include="Global\minidump.h" />
     <QtMoc Include="IBaseProcess.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(ProjectDIr)3rd\ffmpeg\include;$(ProjectDIr)3rd</IncludePath>
       <Define Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB</Define>

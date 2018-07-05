@@ -1,6 +1,9 @@
 #include "IBaseProcess.h"
+#include <QMessageBox>
 #include <io.h>
 #include <direct.h>
+
+#pragma execution_character_set("utf-8") 
 
 IBaseProcess::IBaseProcess()
 {
@@ -38,7 +41,6 @@ int IBaseProcess::SliceFile(const string& src_path_, const string& src_file_name
 
     const int64_t file_length = GetFileSize(_file_name);
     int harf_header_size = file_length * private_file_percent;
-    int key_frame_encrypt_header_len = 1024; // 加密头部长度
 
     // 打开源文件
     shared_ptr<FILE> source_file_ptr(fopen(_file_name.c_str(), "rb"),
@@ -119,9 +121,10 @@ int IBaseProcess::SliceFile(const string& src_path_, const string& src_file_name
     return 0;
 }
 
-int IBaseProcess::MegerFile(
+int IBaseProcess::MergeFile(
     const string& src_private_file_name_, 
     const list<string>& src_public_file_name_list_, 
+    char* aes_key_,
     const string& dest_path_, 
     __out string& dest_file_name_)
 {
@@ -148,6 +151,16 @@ int IBaseProcess::MegerFile(
             return -1;
         }
     }
+    if (!aes_key_) {
+        LOGGER->error("{} aes key is null!", __FUNCTION__);
+        return -1;
+    }
+
+    // 解密准备秘钥
+    InitAesKey((uint8_t *)aes_key_);
+
+    int encrypt_size = GLOBALCONFIG->GetEncrySize();
+
     // 生成目标文件的名称
     int last_pos1 = src_public_file_name_list_.front().find_last_of('/');
     int last_pos2 = src_public_file_name_list_.front().find("_pub_");
@@ -159,43 +172,56 @@ int IBaseProcess::MegerFile(
         return -1;
     }
 
+    // 估算目标文件总大小
     int64_t private_file_size = GetFileSize(src_private_file_name_);
+    int64_t file_size_count = private_file_size + GetFileSize(src_public_file_name_list_.front()) * src_public_file_name_list_.size();
+
+    GLOBALCONFIG->SetFileCount(1);
+    GLOBALCONFIG->SetCurrentFileIndex(1);
+    GLOBALCONFIG->SetCurrentFileName(dest_name);
+    GLOBALCONFIG->SetTotalProgress(0.0f);
 
     // 开始循序读取数据块，并写入文件
-    shared_ptr<FILE> private_fp_ptr(fopen(src_private_file_name_.c_str(), "rb"), 
-        [](FILE* fp) {
-        if (fp) 
-            fclose(fp); 
-    });
-    vector<shared_ptr<FILE>> public_fp_vec;
+    shared_ptr<MergeFileInfo> private_fp_ptr = make_shared<MergeFileInfo>(
+        (char *)src_private_file_name_.c_str(), (uint8_t *)aes_key_
+        );
+        
+    vector<shared_ptr<MergeFileInfo>> public_fp_vec;
     for (auto&& itor : src_public_file_name_list_) {
         public_fp_vec.emplace_back(
-            fopen(itor.c_str(), "rb"), [](FILE* fp) {
-            if (fp)
-                fclose(fp);
-        }
+            make_shared<MergeFileInfo>(
+            (char *)itor.c_str(), (uint8_t *)aes_key_
+            )
         );
     }
 
     // 读取并写入私有块的前一半
-    int tmp_length(0), read_length(0), read_count(0), ret(0);
+    int tmp_length(0), read_length(0), read_count(0), ret(0), progress_size(0);
     uint8_t* read_buffer = (uint8_t*)malloc(block_size);
     do 
     {
-        read_length = fread((void *)&tmp_length, 1, sizeof(int), private_fp_ptr.get());
+        //read_length = fread((void *)&tmp_length, 1, sizeof(int), private_fp_ptr->fp);
+        read_length = private_fp_ptr->ReadData((uint8_t*)&tmp_length, sizeof(int));
         if (read_length < sizeof(int)) {
             LOGGER->warn("{} line {} private file end!", __FUNCTION__, __LINE__);
             break;
         }
         read_count += tmp_length;
         if (read_count > private_file_size / 2) {
-            ret = fseek(private_fp_ptr.get(), 0 - sizeof(int), SEEK_CUR);
+            ret = fseek(private_fp_ptr->fp, 0 - sizeof(int), SEEK_CUR);
             break;
         }
 
-        read_length = fread(read_buffer, 1, tmp_length, private_fp_ptr.get());
+        //read_length = fread(read_buffer, 1, tmp_length, private_fp_ptr.get());
+        read_length = private_fp_ptr->ReadData(read_buffer, tmp_length);
         if (read_length > 0) {
+            //if (read_length >= encrypt_size) {
+            //    // 解密
+            //    AES_CBC_decrypt_buffer(&ctx, read_buffer, encrypt_size);
+            //}
             fwrite(read_buffer, 1, read_length, dest_fp);
+            progress_size += read_length;
+            GLOBALCONFIG->SetChildProgress(1.0f * progress_size / file_size_count);
         }
     } while (true);
 
@@ -205,30 +231,38 @@ int IBaseProcess::MegerFile(
     {
         flag = false;
         for (auto&& itor : public_fp_vec) {
-            read_length = fread((void *)&tmp_length, 1, sizeof(int), itor.get());
+            //read_length = fread((void *)&tmp_length, 1, sizeof(int), itor.get());
+            read_length = itor->ReadData((uint8_t*)&tmp_length, sizeof(int));
             if (read_length < sizeof(int)) {
                 LOGGER->warn("{} line {} public file end!", __FUNCTION__, __LINE__);
                 break;
             }
-            read_length = fread(read_buffer, 1, tmp_length, itor.get());
+            //read_length = fread(read_buffer, 1, tmp_length, itor.get());
+            read_length = itor->ReadData(read_buffer, tmp_length);
             if (read_length != tmp_length) {
                 LOGGER->warn("{} length exception!", __FUNCTION__);
                 break;
             }
             // 判断是否是 UUID
             if (32 == read_length) {
-                char c = fgetc(itor.get());
-                if (feof(itor.get())) {
+                char c = fgetc(itor->fp);
+                if (feof(itor->fp)) {
                     // 此文件结束了，后面的 UUID 不要写入
                     continue;
                 } else {
-                    fseek(itor.get(), -1, SEEK_CUR);
+                    fseek(itor->fp, -1, SEEK_CUR);
                 }
             }
 
             if (read_length > 0) {
+                //if (read_length >= encrypt_size) {
+                //    // 解密
+                //    AES_CBC_decrypt_buffer(&ctx, read_buffer, encrypt_size);
+                //}
                 fwrite(read_buffer, 1, read_length, dest_fp);
                 flag = true;
+                progress_size += read_length;
+                GLOBALCONFIG->SetChildProgress(1.0f * progress_size / file_size_count);
             }
         }
         if (!flag) {
@@ -238,28 +272,41 @@ int IBaseProcess::MegerFile(
 
     // 继续写入私有块的后半块
     do {
-        read_length = fread((void *)&tmp_length, 1, sizeof(int), private_fp_ptr.get());
+        //read_length = fread((void *)&tmp_length, 1, sizeof(int), private_fp_ptr.get());
+        read_length = private_fp_ptr->ReadData((uint8_t*)&tmp_length, sizeof(int));
         if (read_length < sizeof(int)) {
             LOGGER->warn("{} line {} private file end!", __FUNCTION__, __LINE__);
             break;
         }
-        read_length = fread(read_buffer, 1, tmp_length, private_fp_ptr.get());
+        //read_length = fread(read_buffer, 1, tmp_length, private_fp_ptr.get());
+        read_length = private_fp_ptr->ReadData(read_buffer, tmp_length);
         if (32 == read_length) {
-            char c = fgetc(private_fp_ptr.get());
-            if (feof(private_fp_ptr.get())) {
+            char c = fgetc(private_fp_ptr->fp);
+            if (feof(private_fp_ptr->fp)) {
                 // 此文件结束了，后面的 UUID 不要写入
                 continue;
             } else {
-                fseek(private_fp_ptr.get(), -1, SEEK_CUR);
+                fseek(private_fp_ptr->fp, -1, SEEK_CUR);
             }
         }
         if (read_length > 0) {
+            //if (read_length >= encrypt_size) {
+            //    // 解密
+            //    AES_CBC_decrypt_buffer(&ctx, read_buffer, encrypt_size);
+            //}
             fwrite(read_buffer, 1, read_length, dest_fp);
+            progress_size += read_length;
+            GLOBALCONFIG->SetChildProgress(1.0f * progress_size / file_size_count);
         }
     } while (true);
 
     fclose(dest_fp);
     free(read_buffer);
+
+    GLOBALCONFIG->SetChildProgress(1.0f);
+    GLOBALCONFIG->SetTotalProgress(1.0f);
+
+    return 0;
 }
 
 int IBaseProcess::CloseFile()
@@ -291,4 +338,12 @@ int IBaseProcess::GenerateChildFileName(
         publish_child_file_name_list_.emplace_back(string(buffer, len));
     }
     return 0;
+}
+
+void IBaseProcess::InitAesKey(const uint8_t* key_)
+{
+    if (!key_) {
+        return;
+    }
+    AES_init_ctx_iv(&ctx, key_, GLOBALCONFIG->GetAES128Iv());
 }

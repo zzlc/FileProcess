@@ -18,34 +18,41 @@
 <script src="src/js/plugins.js"></script>
 <script src="src/js/main.js"></script>
 
-<!--<input id="fileSelect" type="file" name="选择文件名" type="button" onclick="getSelectFile();"/>-->
-<input id=b type=file name="选择文件夹" webkitdirectory type="button" onclick="getSelectPath();"/>
-<input name="path1" , id="path1">
+<form name="SelectFileForm" class="form-control">
+  <h2>1、选择客户端可执行文件</h2>
+  <input type="file" name="selectFile" id="selectFile" style="display:none;" onChange="document.SelectFileForm.fileName.value=this.value">
+  <input type="button" value="选择客户端路径" onclick="document.SelectFileForm.selectFile.click()">
+  <input type="text" name="fileName" style="width:300px" readonly>
+</form>
 
-<!--<form name="SelectFile">-->
-<!--<input type="file" name="selectFile" id="selectFile" style="display:none;" onChange="document.SelectFile.path.value=this.value">-->
-<!--<input name="fileName" style="width:400px" readonly>-->
-<!--<input type="button" value="选择单个文件" onclick="document.SelectFile.selectFile.click()">-->
-<!--</form>-->
+<form role="sliceForm">
+  <h2>2、分块操作</h2>
+  <div class="form-inline">
+    <label class="form-label">分块数量：</label>
+    <input type="text" id="sliceCount" name="sliceCount" class="form-control" value="5" style="width:50px">
+    <input type="button" id="startClient" name="startClient" class="form-control" value="启动客户端" onclick="startSliceTask(document.SelectFileForm.fileName.value)">
+  </div>
+  <div class="form-group">
+    <p>分块操作说明：</p>
+    <p>选择文件夹，并将文件夹内所有文件按照以上配置进行分块，然后存储在指定目录中。</p>
+    <p>流程为：<br>1、选择待分块文件所在目录；<br>
+      2、指定分块后存储目录；</p>
+  </div>
+</form>
 
-<script>
-  function getPath(allPathName) {
-    if (allPathName.length <= 0) {
-      return
-    }
-    var index = allPathName.lastIndexOf('\\')
-    if (index <= 0) {
-      return
-    }
-    return allPathName.substr(0, index)
-  }
-</script>
-
-<form name="SelectPath">
-  <input type="file" webkitdirectory name="selectPathName" id="selectPathId" style="display:none;"
-         onChange="document.SelectPath.pathName.value=getPath(this.value)">
-  <input name="pathName" id="pathId" style="width:400px" readonly>
-  <input type="button" value="选择文件夹" onclick="document.SelectPath.selectPathName.click()">
+<form role="mergeForm">
+  <h2>3、合成操作</h2>
+  <div class="form-inline">
+    <input type="button" id="startClient2" name="startClient2" class="form-control" value="启动客户端" onclick="startSliceTask(document.SelectFileForm.fileName.value)">
+  </div>
+  <div class="form-group">
+    <p>合成操作流程说明：</p>
+    <p>流程为：<br>1、选择待私有块文件；<br>
+      2、选择多个公有块文件；<br>
+      3、选择合成文件的存储目录；<br>
+      4、启动客户端；
+    </p>
+  </div>
 </form>
 
 </body>
