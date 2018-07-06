@@ -1,0 +1,17 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\MediaFileProcess]
+@="MediaFileProcess"
+"URL Protocol"=""
+
+[HKEY_CLASSES_ROOT\MediaFileProcess\DefaultIcon]
+@="E:\\MediaFileProcess\\FileProcess\\bin\\FPDomain.exe,1" 
+
+[HKEY_CLASSES_ROOT\MediaFileProcess\shell]
+@=""
+
+[HKEY_CLASSES_ROOT\MediaFileProcess\shell\open]
+@=""
+
+[HKEY_CLASSES_ROOT\MediaFileProcess\shell\open\command]
+@="\"E:\\MediaFileProcess\\FileProcess\\bin\\FPDomain.exe\" %1"

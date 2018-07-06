@@ -22,15 +22,17 @@ int main(int argc, char *argv[])
 
     // 打印所有参数
     for (auto&& itor : arguments) {
-        LOGGER->info("{} argument param:{}", __FUNCTION__, itor.toStdString());
+        LOGGER->info("{} argument count:{} param:{}", 
+            __FUNCTION__, arguments.count(), itor.toStdString());
     }
 
     if (argc < 2) {
         QMessageBox::warning(NULL, QObject::tr("启动失败："),
             QObject::tr("需指定启动类型，分块：slice; 合成：merge"));
+        LOGGER->flush();
         return 0;
     }
-
+    
     FileProcess* w = nullptr;
     if (arguments.at(1).compare("slice") == 0) {
         w = new FileProcess(true);
