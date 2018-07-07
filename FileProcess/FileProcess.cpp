@@ -11,6 +11,7 @@ FileProcess::FileProcess(bool slice_, QWidget *parent)
     , _base_process_ptr(new IBaseProcess)
 {
     ui.setupUi(this);
+    this->setWindowTitle(tr("文件处理客户端"));
 
     ui.progressBar_All->setRange(0, 100);
     ui.progressBar_All->setValue(0);
@@ -20,19 +21,16 @@ FileProcess::FileProcess(bool slice_, QWidget *parent)
     setWindowFlags(windowFlags()& ~Qt::WindowMaximizeButtonHint);
     setFixedSize(this->width(), this->height());
 
-    if (slice_) {
-        // 分块测试 
-        SliceProcessDirectory((char *)GLOBALCONFIG->GetAES128Key(), 3, false);
-    } else {
-        // 合并文件测试 
-        MergeProcessDirectory((char *)GLOBALCONFIG->GetAES128Key(), false);
-    }
-
-    show();
-    this->activateWindow();
+    //if (slice_) {
+    //    // 分块测试 
+    //    SliceProcessDirectory((char *)GLOBALCONFIG->GetAES128Key(), 3, false);
+    //} else {
+    //    // 合并文件测试 
+    //    MergeProcessDirectory((char *)GLOBALCONFIG->GetAES128Key(), false);
+    //}
 
     connect(&_timer, SIGNAL(timeout()), this, SLOT(UpdateProgressSlot()));
-    _timer.start(1000);
+    _timer.start(500);
 }
 
 FileProcess::~FileProcess()
@@ -57,6 +55,7 @@ int FileProcess::SliceProcessDirectory(char* aes_key_, const int& slice_count_,
         QueryDirectory(src_dir, file_name_list);
         if (file_name_list.empty()) {
             LOGGER->warn("{} path:{} nothing!", __FUNCTION__, src_dir.toStdString());
+            return -1;
         }
 
         // 确定目标文件夹，默认同原文件夹 
@@ -70,7 +69,7 @@ int FileProcess::SliceProcessDirectory(char* aes_key_, const int& slice_count_,
         while (itor != file_name_list.end()) {
             int64_t file_length = GetFileSize(unicode_to_utf(src_dir.toStdWString()) + "/" + *itor);
             if (file_length < (slice_count_ + 1) * block_size) {
-                QString msg = QString::fromLocal8Bit("文件 %1 过小，此客户端暂不处理")
+                QString msg = QString::fromLocal8Bit("文件 %1 太小，此客户端暂不处理")
                     .arg(utf_to_unicode(*itor).c_str());
                 QMessageBox::warning(NULL, QString::fromLocal8Bit("警告"),
                     msg);
@@ -112,6 +111,8 @@ int FileProcess::SliceProcessDirectory(char* aes_key_, const int& slice_count_,
             }
         }
         );
+    } else {
+        return -1;
     }
     LOGGER->info("{} End", __FUNCTION__);
     return 0;
@@ -131,8 +132,13 @@ int FileProcess::MergeProcessDirectory(char* aes_key_, bool use_src_dir_)
         return -1;
     }
     QString dest_path = private_file_name;
+    int pos = dest_path.lastIndexOf("/");
+    dest_path = dest_path.remove(pos, dest_path.size() - pos);
     if (!use_src_dir_) {
         dest_path = SelectDir(tr("选择合成文件存储文件夹"));
+        if (dest_path.isEmpty()) {
+            return -1;
+        }
     }
 
     // 转换成 stl
@@ -144,7 +150,7 @@ int FileProcess::MergeProcessDirectory(char* aes_key_, bool use_src_dir_)
     // 通过 UUID 检查是否为同一文件来源 
     if (!CheckFiles(unicode_to_utf(private_file_name.toStdWString()), public_file_list)) {
         LOGGER->warn("{} CheckFiles failed!", __FUNCTION__);
-        QMessageBox::warning(nullptr, tr("文件 UUID 校验失败！"), tr("错误："));
+        QMessageBox::warning(nullptr, tr("错误："), tr("文件 UUID 校验失败！"));
         return -1;
     }
 
@@ -183,25 +189,24 @@ bool FileProcess::CheckFiles(const string& private_file_name_, const list<string
         }
     }
     FILE *tmp_fp = NULL;
-    uint8_t tmp_buffer[16] = { 0 };
-    string uuid_str;
+    uint8_t src_uuid_buf[32] = { 0 };
+    uint8_t tmp_uuid_buf[32] = { 0 };
     errno_t ret = fopen_s(&tmp_fp, private_file_name_.c_str(), "rb");
     if (ret != 0) {
         LOGGER->warn("{} file:{} open failed!", __FUNCTION__, private_file_name_);
         return false;
     }
-    if (0 != _fseeki64(tmp_fp, -16LL, SEEK_END)) {
+    if (0 != _fseeki64(tmp_fp, -32LL, SEEK_END)) {
         LOGGER->warn("{} seek file:{} failed!", __FUNCTION__, private_file_name_);
         fclose(tmp_fp);
         return false;
     }
-    ret = fread(tmp_buffer, 1, sizeof(tmp_buffer), tmp_fp);
-    if (ret != sizeof(tmp_buffer)) {
+    ret = fread(src_uuid_buf, 1, sizeof(src_uuid_buf), tmp_fp);
+    if (ret != sizeof(src_uuid_buf)) {
         LOGGER->warn("{} read file:{} failed!", __FUNCTION__, private_file_name_);
         fclose(tmp_fp);
         return false;
     }
-    uuid_str.append((char *)tmp_buffer, ret);
     fclose(tmp_fp);
 
     // 检查公有块 UUID 是否与私有块一致 
@@ -211,19 +216,16 @@ bool FileProcess::CheckFiles(const string& private_file_name_, const list<string
             LOGGER->warn("{} open file:{} failed!", __FUNCTION__, itor);
             return false;
         }
-        if (0 != _fseeki64(fp_ptr.get(), -16LL, SEEK_END)) {
+        if (0 != _fseeki64(fp_ptr.get(), -32LL, SEEK_END)) {
             LOGGER->warn("{} seek file:{} failed!", __FUNCTION__, itor);
-            fclose(tmp_fp);
             return false;
         }
-        ret = fread(fp_ptr.get(), 1, sizeof(tmp_buffer), tmp_fp);
-        if (ret != sizeof(tmp_buffer)) {
+        ret = fread(tmp_uuid_buf, 1, sizeof(src_uuid_buf), fp_ptr.get());
+        if (ret != sizeof(src_uuid_buf)) {
             LOGGER->warn("{} read file:{} failed!", __FUNCTION__, itor);
-            fclose(tmp_fp);
             return false;
         }
-        string tmp_uuid((char *)tmp_buffer, ret);
-        if (uuid_str.compare(tmp_uuid) != 0) {
+        if (memcmp(src_uuid_buf, tmp_uuid_buf, sizeof(src_uuid_buf)) != 0) {
             LOGGER->warn("{} file:{} uuid not equal private uuid!", __FUNCTION__, itor);
             return false;
         }

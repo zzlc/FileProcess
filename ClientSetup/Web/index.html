@@ -1,0 +1,86 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>文件处理</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="manifest" href="src/site.webmanifest">
+  <link rel="apple-touch-icon" href="src/icon.png">
+  <!-- Place favicon.ico in the root directory -->
+
+</head>
+
+<body>
+<script src="src/js/plugins.js"></script>
+<script src="src/js/main.js"></script>
+
+<form name="SelectFileForm" class="form-control">
+  <h2>1、验证客户端程序</h2>
+  <!--<input type="file" name="selectFile" id="selectFile" style="display:none;" onChange="document.SelectFileForm.fileName.value=this.value">-->
+  <!--<input type="button" value="选择客户端路径" onclick="document.SelectFileForm.selectFile.click()">-->
+  <!--<input type="text" name="fileName" style="width:300px" readonly>-->
+  <input type="button" name="CheckClient" value="客户端测试" onclick="window.location.href='MediaFileProcess://test'">
+  <div class="form-group">
+    <p>客户端安装方法：</p>
+    <p>在客户端目录下右键以管理员权限运行 add_reg.bat 脚本，提示均选 “是”，写入注册表。</p>
+    <p>如果上一步执行完毕，客户端仍验证失败，则在以管理员权限启动的命令窗口中，进入到客户端目录，执行命令：
+      <br>FPDomain.exe addreg </p>
+  </div>
+</form>
+
+<script>
+  function startSliceTask2(sliceCount) {
+    // onclick="window.location.href='MediaFileProcess://slice'"
+    if (sliceCount <= 1) {
+      alert("分块数量至少大于 2");
+      console.log("分块数量至少大于 2，" + " current slice count:" + sliceCount);
+      return;
+    }
+    var s = "MediaFileProcess://slice";
+    s += "_"
+    s += sliceCount;
+    console.log(s);
+    window.location.href=s;
+  }
+</script>
+
+<form role="sliceForm" name="sliceForm">
+  <h2>2、分块操作</h2>
+  <div class="form-inline">
+    <label class="form-label">分块数量：</label>
+    <input type="text" id="sliceCount" name="sliceCount" class="form-control" value="5" style="width:50px">
+    <input type="button" id="startClient" name="startClient" class="form-control" value="启动客户端"
+           onclick="startSliceTask2(document.sliceForm.sliceCount.value)">
+  </div>
+  <div class="form-group">
+    <p>分块操作说明：</p>
+    <p>选择文件夹，并将文件夹内所有文件按照以上配置进行分块，然后存储在指定目录中。</p>
+    <p>流程为：<br>1、选择待分块文件所在目录；<br>
+      2、指定分块后存储目录；</p>
+  </div>
+</form>
+
+<form role="mergeForm">
+  <h2>3、合成操作</h2>
+  <div class="form-inline">
+    <input type="button" id="startClient2" name="startClient2" class="form-control" value="启动客户端"
+           onclick="window.location.href='MediaFileProcess://merge'">
+  </div>
+  <div class="form-group">
+    <p>合成操作流程说明：</p>
+    <p>流程为：<br>1、选择待私有块文件；<br>
+      2、选择多个公有块文件；<br>
+      3、选择合成文件的存储目录；<br>
+      4、启动客户端；
+    </p>
+  </div>
+</form>
+
+</body>
+
+
+</html>

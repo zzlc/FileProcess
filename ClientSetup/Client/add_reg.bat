@@ -1,0 +1,1 @@
+FPDomain.exe addreg

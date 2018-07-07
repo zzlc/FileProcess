@@ -86,6 +86,12 @@ struct SliceFileInfo
             } while (false);
             this_thread::sleep_for(chrono::milliseconds(1));
         }
+        // 避免最后的 uuid 未写入
+        if (update_flag) {
+            fwrite((void *)&payload_size, 1, sizeof(payload_size), fp);
+            fwrite(buffer, 1, payload_size, fp);
+            update_flag = false;
+        }
     }
 
 protected:
