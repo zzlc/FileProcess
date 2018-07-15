@@ -1,0 +1,140 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>测试-文件处理</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="manifest" href="src/site.webmanifest">
+    <link rel="apple-touch-icon" href="src/icon.png">
+    <!-- Place favicon.ico in the root directory -->
+
+</head>
+
+<body>
+
+    <script>
+        var _upload = "MediaFileProcess://upload {token:xxxx,id:1}"
+        var _private = "MediaFileProcess://private {token:xxxx}"
+        var _download = "MediaFileProcess://download {token:xxxx,id:[1,2,3]}"
+
+        function getToken() {
+            return 'xxx';
+        }
+
+        //去除字符串尾部空格或指定字符  
+        String.prototype.trimEnd = function (c) {
+            if (c == null || c == "") {
+                var str = this;
+                var rg = /s/;
+                var i = str.length;
+                while (rg.test(str.charAt(--i)));
+                return str.slice(0, i + 1);
+            }
+            else {
+                var str = this;
+                var rg = new RegExp(c);
+                var i = str.length;
+                while (rg.test(str.charAt(--i)));
+                return str.slice(0, i + 1);
+            }
+        }  
+    </script>
+
+    <form name="SelectFileForm" class="form-control">
+        <h2>1、上传</h2>
+        <input type="text" placeholder="节目id" id="idInput">
+        <script>
+            function callupload(input) {
+                var val = +input;
+                if (isNaN(val)) {
+                    alert('输入有误');
+                    return;
+                }
+                var params = `{token:${getToken()},id:${input}}`;
+                var address = 'MediaFileProcess://upload ' + params;
+                console.log(address);
+                window.location.href = address;
+            }
+        </script>
+        <input type="button" name="CheckClient" value="上传" onclick="callupload(document.getElementById('idInput').value.trim())">
+        <div class="form-group">
+            <p>上传操作说明：</p>
+            1、填入节目id；（只允许单个
+            <br> 
+            2、点击'上传'按钮；
+            <br>
+            <br>
+        </div>
+    </form>
+
+    <form role="sliceForm" name="sliceForm">
+        <h2>2、上传私有块</h2>
+        <div class="form-inline">
+            <script>
+                function callprivate() {
+                    var params = `{token:${getToken()}}`;
+                    var address = 'MediaFileProcess://private ' + params;
+                    console.log(address);
+                    window.location.href = address;
+                }
+            </script>
+            <input type="button" id="startClient" name="startClient" class="form-control" value="上传私有块" onclick="callprivate()">
+        </div>
+        <div class="form-group">
+            <p>上传私有块操作说明：</p>
+            1、点击'上传私有块'按钮；
+            <br>
+            <br>
+        </div>
+    </form>
+
+    <form role="mergeForm">
+        <h2>3、下载</h2>
+        <div class="form-inline">
+            <textarea placeholder="母带id" id="idArrayInput" rows="5" style="resize: none"></textarea>
+            <script>
+                function calldownload(input) {
+                    var idArray = [];
+                    var split = input.trimEnd(',').split(',');
+                    for (const key in split) {
+                        if (split.hasOwnProperty(key)) {
+                            const val = +split[key];
+                            if (!isNaN(val)) {
+                                idArray.push(val);
+                            } else {
+                                alert('输入有误');
+                                return;
+                            }
+                        }
+                    }
+
+                    var idString = '';
+                    idArray.forEach(x => idString = idString + x + ',');
+                    idString = idString.trimEnd(',');
+
+                    var params = `{token:${getToken()},id:[${idString}]}`;
+                    var address = 'MediaFileProcess://download ' + params;
+                    console.log(address);
+                    window.location.href = address;
+                }
+            </script>
+            <input type="button" id="startClient2" name="startClient2" class="form-control" value="下载" onclick="calldownload(document.getElementById('idArrayInput').value.trim())">
+        </div>
+        <div class="form-group">
+            <p>下载操作说明：</p>
+            1、填入母带id；（多个用逗号隔开，如 1,2,3
+            <br>
+            2、点击'下载'按钮；
+            <br>
+            <br>
+        </div>
+    </form>
+
+</body>
+
+
+</html>

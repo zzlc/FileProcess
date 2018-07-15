@@ -6,8 +6,11 @@
 #include "FileProcess.h"
 #include "Global/GlobalConfig.h"
 #include "Global/minidump.h"
+#include "interface/FileProcessInterface.h"
 
 #pragma execution_character_set("utf-8") 
+
+#ifdef DLL_EXPORT
 
 int main(int argc, char *argv[])
 {
@@ -67,3 +70,4 @@ int main(int argc, char *argv[])
     delete w;
     return ret;
 }
+#endif // DLL_EXPORT

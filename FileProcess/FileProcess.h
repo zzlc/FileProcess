@@ -30,7 +30,7 @@ public:
     int         MergeProcessDirectory(char* aes_key_, bool use_src_dir_);
 
     // 检测文件块列表是否是同一个文件来源（文件尾部的 UUID）
-    bool        CheckFiles(const string& private_file_name_, const list<string>& public_file_list_);
+    static bool CheckFiles(const string& private_file_name_, const list<string>& public_file_list_);
 
 protected:
     // 选择一个文件

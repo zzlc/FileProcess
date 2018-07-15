@@ -1,0 +1,607 @@
+<!DOCTYPE html><html><head><title>上载下载客户端对接文档</title><meta charset='utf-8'><link href='https://dn-maxiang.qbox.me/res-min/themes/marxico.css' rel='stylesheet'><style></style></head><body><div id='preview-contents' class='note-content'>
+                        
+                    
+
+
+
+<h1 id="上载下载客户端对接文档">上载下载客户端对接文档</h1>
+
+<p></p>
+
+
+
+<h2 id="相关介绍">相关介绍</h2>
+
+
+
+<h3 id="web端demo">Web端Demo</h3>
+
+<p>用户模拟Web端调起客户端进行测试，文件在本文件同一目录<code>web_test.html</code></p>
+
+
+
+<h3 id="ipfs客户端">IPFS客户端</h3>
+
+<p>安装包位于本文件同一目录的<code>go-ipfs_v0.4.15_darwin-amd64.tar.gz</code></p>
+
+<blockquote>
+  <p>安装IPFS客户端：执行<code>install</code>脚本</p>
+</blockquote>
+
+<p><br></p>
+
+<blockquote>
+  <p>上载文件命令：ipfs add 文件绝对路径 <br>
+  <code>added</code> 表示上载文件完成 <br>
+  <code>QmbFMke1KXqnYyBBWxB74N4c5SBnJMVAiMNRcGu6x1AwQH</code> 表示该文件的IPFS Hash值 <br>
+  <code>repo.lock</code> 表示该文件的文件名</p>
+</blockquote>
+
+<pre class="prettyprint hljs-dark"><code class="language-bash hljs"><div class="hljs-line">$ ipfs add ~/.ipfs/repo.lock 
+</div><div class="hljs-line">added QmbFMke1KXqnYyBBWxB74N4c5SBnJMVAiMNRcGu6x1AwQH repo.lock
+</div></code></pre>
+
+<blockquote>
+  <p>下载文件命令：ipfs get IPFS的文件Hash值 -o 保存文件路径</p>
+</blockquote>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="language-bash hljs"><div class="hljs-line">ipfs get QmbFMke1KXqnYyBBWxB74N4c5SBnJMVAiMNRcGu6x1AwQH -o ~/.ipfs/
+</div></code></pre>
+
+<blockquote>
+  <p>获取本机IPFS的配置：ipfs id <br>
+  其中返回值中的”ID”字段表示本机IPSG IP</p>
+</blockquote>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="language-bash hljs"><div class="hljs-line">$ ipfs id
+</div><div class="hljs-line">{
+</div><div class="hljs-line">    <span class="hljs-string">"ID"</span>: <span class="hljs-string">"QmdH7B7x8KCEyzpQV27Pq2XnVtAdmEkgrYinGUSNpzhgoC"</span>,
+</div><div class="hljs-line">    <span class="hljs-string">"PublicKey"</span>: <span class="hljs-string">"CAASpgIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDWtFEbtO+xSkeIG0PQMh8dFz9P86SBggGeujZDqdH7K8ZfI16/E412um+dt4JWTAFqSFjh6ZEUrJOeiYZXcIDiDdEGYrprBkJcXUfTOMrlNw4wzwEiVqeP+RHki6Pz6h4/GzE5nkqT+T34Ha1gMRVNxRzSUq6KEUM9ZzkfOiBAAv4ysSZ+JzQ66D3XT0m+uSItvSs9Y/N6fMvEYVp/zSIK2wIYkP/oL7g1Hh7fJEhqf2E/5tDOtaq2AH0u3q0oZa7NnsBLhSL/k+L0pbA3Ltc/tObE0ajPm6tohsfxXxjYw4FMMw0uhQrd0DTZtaz8Xc/aDUHj5ZQWQabF3Gbwus8vAgMBAAE="</span>,
+</div><div class="hljs-line">    <span class="hljs-string">"Addresses"</span>: [
+</div><div class="hljs-line">        <span class="hljs-string">"/ip4/127.0.0.1/tcp/4001/ipfs/QmdH7B7x8KCEyzpQV27Pq2XnVtAdmEkgrYinGUSNpzhgoC"</span>,
+</div><div class="hljs-line">        <span class="hljs-string">"/ip4/192.168.1.124/tcp/4001/ipfs/QmdH7B7x8KCEyzpQV27Pq2XnVtAdmEkgrYinGUSNpzhgoC"</span>,
+</div><div class="hljs-line">        <span class="hljs-string">"/ip6/::1/tcp/4001/ipfs/QmdH7B7x8KCEyzpQV27Pq2XnVtAdmEkgrYinGUSNpzhgoC"</span>,
+</div><div class="hljs-line">        <span class="hljs-string">"/ip4/101.81.249.79/tcp/4001/ipfs/QmdH7B7x8KCEyzpQV27Pq2XnVtAdmEkgrYinGUSNpzhgoC"</span>,
+</div><div class="hljs-line">        <span class="hljs-string">"/ip4/101.81.249.79/tcp/22144/ipfs/QmdH7B7x8KCEyzpQV27Pq2XnVtAdmEkgrYinGUSNpzhgoC"</span>
+</div><div class="hljs-line">    ],
+</div><div class="hljs-line">    <span class="hljs-string">"AgentVersion"</span>: <span class="hljs-string">"go-ipfs/0.4.15/"</span>,
+</div><div class="hljs-line">    <span class="hljs-string">"ProtocolVersion"</span>: <span class="hljs-string">"ipfs/0.1.0"</span>
+</div><div class="hljs-line">}
+</div></code></pre>
+
+
+
+<h2 id="客户端与web端及服务端交互流程">客户端与Web端及服务端交互流程</h2>
+
+
+
+<h3 id="上载公有块">上载公有块</h3>
+
+<p>用户在Web端点击上传母带，调起客户端。选择文件后，读取文件夹中的文件，首先要为每一个文件新建一个上载任务，然后再依次进行分块加密和上载的操作，并实时向服务端上报任务进度</p>
+
+<ol><li rel="1">Web端调起客户端<code>MediaFileProcess://{"order":"upload_public","token":"xxx","id":123}</code> <br>
+<ul>
+<li>携带参数说明 <br>
+<ul>
+<li>order: 任务类型</li>
+<li>token: 用户认证token</li>
+<li>id: 节目系列ID</li></ul></li></ul></li>
+<li rel="1">新建上载公有块任务 <br>
+用户选择母带文件所在的文件夹，读取文件夹中的文件，为需要上传的每一个母带文件调用一次<a href="#jump1" target="_self">新建上载公有块任务接口</a>新建一个上载任务 <br>
+<ul>
+<li>参数说明 <br>
+<ul>
+<li>token: 用户认证token （由Web端调起客户端时传入）</li>
+<li>series_id: 节目ID （由Web端调起客户端时传入）</li>
+<li>uuid: 客户端为每一个文件生成一个UUID，作为每个文件的唯一标识，同时也用于匹配该文件生成的公有块和私有块</li>
+<li>source_name: 文件名，这里注意是原始的文件名，即读取到的文件名</li></ul></li>
+<li>调用成功： <br>
+响应返回该上载公有块任务的<code>节目信息，母带信息，任务信息等</code></li>
+<li>调用失败： <br>
+提示响应返回的<code>message</code>字段返回的错误信息</li></ul></li>
+<li rel="1">文件分块加密处理 <br>
+<ul>
+<li>任务新建成功后默认状态为未开始（等待中）。开始对母带文件进行本地分块加密处理</li>
+<li>在本地分块加密过程中，每过5秒调用一次<a href="#jump2" target="_self">更新上载公有块任务状态接口</a>上报更新任务进度</li></ul></li>
+<li rel="1">上载公有块文件 <br>
+<ul>
+<li>分块加密结束后，执行cmd命令<code>ipfs add 文件绝对路径</code>进行上载</li>
+<li>调用<a href="#jump2" target="_self">更新上载公有块任务状态接口</a>更新任务进入为上载中</li></ul></li>
+<li rel="1">上载公有块完成 <br>
+<ul>
+<li>当上载公有块执行的cmd命令调用成功后，获取cmd返回值, 需解析返回值中的IPFS Hash值，用于更新任务状态接口中<code>hash</code>参数的值</li>
+<li>调用<a href="#jump2" target="_self">更新上载公有块任务状态接口</a>更新上载任务并提交IPFS上载相关信息</li>
+<li><strong>注：</strong> 完成上传时，调用更新上载公有块任务接口，以下参数为必传 <br>
+<ul>
+<li>参数说明</li>
+<li>status: 当前任务状态</li>
+<li>percent: 不传或者传100</li>
+<li>name: 公有块文件名</li>
+<li>file: 公有块所在文件夹名</li>
+<li>hash: 调用IPFS上传接口完成后返回的Hash值</li>
+<li>size: 公有块大小</li>
+<li>ip: 该上载机的IPFS客户端的IP，使用cmd命令<code>ipfs id</code>解析获得</li></ul></li></ul></li>
+</ol>
+
+
+
+<h3 id="下载母带">下载母带</h3>
+
+<p>用户选择母带后，点击下载，调起客户端。客户端需要新建下载母带任务，同时服务器会生成一条上载母带私有块的子任务。整个下载母带任务中，需要等待上载母带私有块子任务完成后，才可以顺利完成整个下载母带任务。</p>
+
+<ol><li rel="1">Web端调起客户端<code>MediaFileProcess://{"order":"download","token":"xxx","id":[1,2]}</code> <br>
+<ul>
+<li>传入客户端的参数说明 <br>
+<ul>
+<li>order: 任务类型</li>
+<li>token：用户认证token</li>
+<li>id：需要下载的母带的ID列表</li></ul></li></ul></li>
+<li rel="1">新建母带下载任务 <br>
+客户端被调起后解析传入参数，用母带ID列表中的每一个ID逐一调用<a href="#jump3" target="_self">新建下载母带任务接口</a>新建一条下载母带任务 <br>
+<ul>
+<li>调用成功： <br>
+响应返回该下载任务的<code>母带信息，公有块信息，私有块信息 任务信息等</code></li>
+<li>调用失败： <br>
+提示响应返回的<code>message</code>字段返回的错误信息</li></ul></li>
+<li rel="1">下载公有块 <br>
+<ul>
+<li>执行cmd命令<code>ipfs get 调用新建下载母带任务接口返回的公有块IPFS Hash值 -o 文件下载路径</code>令IPFS客户端执行下载</li>
+<li>调用<a href="#jump4" target="_self">更新下载母带任务状态接口</a>更新下载母带任务状态 <br>
+<ul>
+<li>在下载公有块过程中，每过5秒上报更新一次任务进度</li>
+<li>具体进度规则 <br>
+使用当前已下载公有块文件大小和<a href="#jump3" target="_self">新建下载母带任务接口</a>返回的公有块大小相除得出</li></ul></li></ul></li>
+<li rel="1">获取私有块信息 <br>
+公有块下载完成后，调用<a href="#jump5" target="_self">获取下载母带任务详情接口</a>查询该任务中的<code>私有块上载状态</code> <br>
+<ul>
+<li>如果查询到私有块还未上载或在上载中，则每过5秒调用一次<a href="#jump5" target="_self">获取下载母带任务详情接口</a>获取私有块信息，直到查询到私有块已上载完成</li>
+<li>如果查询到私有块已上载完成，则进行下一步</li></ul></li>
+<li rel="1">下载私有块 <br>
+<ul>
+<li>执行cmd命令<code>ipfs get 调用获取下载母带任务详情接口返回的私有块IPFS Hash值 -o 文件下载路径</code>令IPFS客户端执行下载</li>
+<li>调用<a href="#jump4" target="_self">更新下载母带任务状态接口</a>更新下载母带任务状态 <br>
+<ul>
+<li>在下载私有块过程中，每过5秒上报更新一次任务进度</li>
+<li>具体进度规则 <br>
+使用当前已下载私有块文件大小和<a href="#jump5" target="_self">获取下载母带任务详情接口</a>返回的私有块大小相除得出</li></ul></li></ul></li>
+<li rel="1">本地合成 <br>
+<ul>
+<li>将已下载完成的母带公有块和私有块进行本地合成</li>
+<li>在本地合成中过程中，每过5秒上报更新一次任务进度</li></ul></li>
+<li rel="1">任务完成 <br>
+完成本地合成后，完成了整个下载母带任务，调用<a href="#jump4" target="_self">更新下载母带任务状态接口</a>更新下载母带任务状态为已完成</li>
+</ol>
+
+
+
+<h3 id="上载私有块">上载私有块</h3>
+
+<p>客户端向服务器申请下载母带时，服务器会为母带的拥有者生成上载私有块的子任务。将私有块上载完成后，下载母带任务才能继续进行</p>
+
+<ol><li rel="1">Web端调起客户端<code>MediaFileProcess://{"order":"upload_private","token":"xxx"}</code> <br>
+<ul>
+<li>传入客户端的参数说明 <br>
+<ul>
+<li>order: 任务类型</li>
+<li>token：用户认证token</li></ul></li></ul></li>
+<li rel="2">获取上载私有块任务列表 <br>
+<ul>
+<li>调用<a href="#jump6" target="_self">获取上载私有块任务列表接口</a>获取到该用户的所有的上载私有块任务列表</li></ul></li>
+<li rel="3">选择私有块文件夹 <br>
+<ul>
+<li>用户点击<code>上传私有块</code>打开文件选择器，选择私有块文件夹</li>
+<li>读取文件夹中的文佳，匹配每个私有块上载任务对应的私有块 <br>
+<ul>
+<li>私有块匹配规则 <br>
+每个私有块上传任务数据中的uuid需要与私有块文件名中的uuid对应，即完成私有块文件匹配</li></ul></li></ul></li>
+<li rel="4">上载私有块文件 <br>
+<ul>
+<li>执行cmd命令<code>ipfs add 私有块绝对路径</code></li>
+<li>在开始上载调用<a href="#jump7" target="_self">更新上载私有块任务状态接口</a>更新任务状态为上载中</li></ul></li>
+<li rel="5">上载私有块文件完成 <br>
+<ul>
+<li>当上载私有块执行的cmd命令调用成功后，获取cmd返回值, 需解析返回值中的IPFS Hash值，用于更新任务状态接口中<code>hash</code>参数的值</li>
+<li>调用<a href="#jump7" target="_self">更新上载私有块任务状态接口</a>更新上载任务并提交IPFS上载相关信息</li>
+<li><strong>注：</strong> 完成上传时，调用更新上载私有块任务接口，以下参数为必传 <br>
+<ul>
+<li>参数说明</li>
+<li>status: 当前任务状态</li>
+<li>percent: 不传或者传100</li>
+<li>name: 公有块文件名</li>
+<li>file: 公有块所在文件夹名</li>
+<li>hash: 调用IPFS上传接口完成后返回的Hash值</li>
+<li>size: 公有块大小</li>
+<li>ip: 该上载机的IPFS客户端的IP，使用cmd命令<code>ipfs id</code>解析获得</li></ul></li></ul></li>
+</ol>
+
+
+
+<h2 id="上载下载任务接口文档">上载下载任务接口文档</h2>
+
+
+
+<h3 id="请求通用信息介绍">请求通用信息介绍</h3>
+
+<blockquote>
+  <p>测试环境地址: <code>http://101.81.249.79:8000</code> <br>
+  正式环境地址: <code>等待给出</code></p>
+  
+  <p>关于用户鉴权： <br>
+  1.每次调起客户端时，都会携带token参数，用于在调用接口时校验权限 <br>
+  2.每个任务都与调起客户端时传入的token绑定，在整个任务流程中，该任务的token维持不变 <br>
+  3.token在每次调用接口时在请求头中的token字段中传入</p>
+</blockquote>
+
+
+
+<h3 id="新建上载公有块任务接口"><span id="jump1">新建上载公有块任务接口</span></h3>
+
+
+
+<h5 id="http-request">HTTP Request</h5>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs armasm"><div class="hljs-line">&lt;<span class="hljs-built_in">PC</span>&gt;
+</div><div class="hljs-line">新建上载任务时，使用影视系列ID新建上载任务, 任务默认状态未开始状态
+</div></code></pre>
+
+<blockquote>
+  <p>URL <code>POST /api/v1/tasks/upload/public</code></p>
+  
+  <p>Param <code>FormData</code></p>
+</blockquote>
+
+<table><tbody><tr style="font-weight:bold">  <td>参数名</td>  <td>描述</td>  <td>类型</td>  <td>是否必传</td>  <td>默认值</td>  <td>备注</td></tr><tr>  <td>series_id</td>  <td>系列ID</td>  <td>int</td>  <td>是</td>  <td>无</td>  <td></td></tr><tr>  <td>uuid</td>  <td>节目UUID</td>  <td>str</td>  <td>是</td>  <td>无</td>  <td>为每条需要上传的节目母带文件创建一个UUID</td></tr><tr>  <td>source_name</td>  <td>节目名，即初始视频文件名称</td>  <td>str</td>  <td>是</td>  <td>无</td>  <td></td></tr></tbody></table>
+
+
+
+<h5 id="http-response">HTTP Response</h5>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="language-json hljs"><div class="hljs-line">{
+</div><div class="hljs-line">    <span class="hljs-attr">"data"</span>: {
+</div><div class="hljs-line">        <span class="hljs-attr">"id"</span>: <span class="hljs-number">233</span>,                                             // 任务ID
+</div><div class="hljs-line">        <span class="hljs-attr">"status"</span>: <span class="hljs-number">0</span>,                                           // 任务状态 0=未开始；1=分块加密中；2=上载中；3=下载公有块中；4=等待授权中(等待私有块上传中)；5=下载私有块中；6=合成中；7=已完成；8=出现错误
+</div><div class="hljs-line">        <span class="hljs-attr">"percent"</span>: <span class="hljs-number">0</span>,                                          // 具体进度 单位：百分点 0~100之间
+</div><div class="hljs-line">        <span class="hljs-attr">"series_id"</span>: <span class="hljs-number">233</span>,                                      // 节目系列ID
+</div><div class="hljs-line">        <span class="hljs-attr">"source_id"</span>: <span class="hljs-number">233</span>,                                      // 母带文件ID
+</div><div class="hljs-line">        <span class="hljs-attr">"source_name"</span>: <span class="hljs-string">"仙剑奇侠传-电视版（第21集）"</span>,             // 视频母带源文件名
+</div><div class="hljs-line">        <span class="hljs-attr">"uuid"</span>: <span class="hljs-string">"283509238"</span>,                                   // 节目母带的UUID
+</div><div class="hljs-line">        <span class="hljs-attr">"ip"</span>: <span class="hljs-string">"QmdUVasivefLGRkT49mzcp82Qoc47UBb5G9bHXdZkW3RP"</span>, // 上载机IP
+</div><div class="hljs-line">        <span class="hljs-attr">"file"</span>: <span class="hljs-string">"仙剑奇侠传"</span>,                                    // 文件夹名
+</div><div class="hljs-line">        <span class="hljs-attr">"name"</span>: <span class="hljs-string">"仙剑奇侠传-电视版（第21集）"</span>,                     // 公有块文件名
+</div><div class="hljs-line">        <span class="hljs-attr">"size"</span>: <span class="hljs-number">102400</span>,                                         // 公有块文件大小，单位：B
+</div><div class="hljs-line">        <span class="hljs-attr">"hash"</span>: <span class="hljs-string">"QmTxvr8VXe37apeBjyPeAGZi5JiRSbwn8mr2DuuqR517Lo"</span>, // 公有块IPFS Hash
+</div><div class="hljs-line">        <span class="hljs-attr">"created_at"</span>: <span class="hljs-string">"2018-05-06 12:00:00"</span>                     // 任务创建时间
+</div><div class="hljs-line">    },
+</div><div class="hljs-line">    <span class="hljs-attr">"message"</span>: <span class="hljs-string">""</span>                                               // 用户提示文案信息, 空则无需提示
+</div><div class="hljs-line">}
+</div></code></pre>
+
+
+
+<h3 id="更新上载公有块任务状态接口"><span id="jump2">更新上载公有块任务状态接口</span></h3>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs markdown"><div class="hljs-line"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">PC</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="hljs-bullet">1. </span>开始进行本地分块加密等处理时，提交更新状态
+</div><div class="hljs-line"><span class="hljs-bullet">2. </span>本地处理结束，需要调用IPFS进行上传时，提交更新状态，同时将IPFS需要的相关数据上传
+</div><div class="hljs-line"><span class="hljs-bullet">3. </span>最终IPFS上传成功或失败，提交更新状态
+</div></code></pre>
+
+
+
+<h5 id="http-request-1">HTTP Request</h5>
+
+<blockquote>
+  <p>URL <code>PATCH /api/v1/tasks/upload/public/{任务ID}</code></p>
+  
+  <p>Param <code>FormData</code></p>
+</blockquote>
+
+<table><tbody><tr style="font-weight:bold">  <td>参数名</td>  <td>描述</td>  <td>类型</td>  <td>是否必传</td>  <td>默认值</td>  <td>备注</td></tr><tr>  <td>status</td>  <td>状态值</td>  <td>int</td>  <td>是</td>  <td>无</td>  <td>0=未开始；1=分块加密中；2=上载中；3=下载公有块中；4=等待授权中(等待私有块上传中)；5=下载私有块中；6=合成中；7=已完成；8=出现错误</td></tr><tr>  <td>percent</td>  <td>数值</td>  <td>int</td>  <td>否</td>  <td>无</td>  <td>0~100的数字，只需要传可以拿到的进度，没有进度不需要传，完成传100</td></tr><tr>  <td>name</td>  <td>文件名</td>  <td>str</td>  <td>是</td>  <td>无</td>  <td>节目母带文件名</td></tr><tr>  <td>file</td>  <td>文件夹名称</td>  <td>str</td>  <td>是</td>  <td>无</td>  <td>节目母带文件夹名称</td></tr><tr>  <td>hash</td>  <td>文件HASH值</td>  <td>str</td>  <td>是</td>  <td>无</td>  <td>调用IPFS上传成功时返回的公有块Hash</td></tr><tr>  <td>size</td>  <td>文件大小</td>  <td>float</td>  <td>是</td>  <td>无</td>  <td>公有块文件大小</td></tr><tr>  <td>ip</td>  <td>上载机IPFS的IP</td>  <td>str</td>  <td>是</td>  <td>无</td>  <td></td></tr></tbody></table>
+
+
+
+<h5 id="http-response-1">HTTP Response</h5>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="language-json hljs"><div class="hljs-line">{
+</div><div class="hljs-line">    <span class="hljs-attr">"data"</span>: {
+</div><div class="hljs-line">        <span class="hljs-attr">"id"</span>: <span class="hljs-number">233</span>,                                             // 任务ID
+</div><div class="hljs-line">        <span class="hljs-attr">"status"</span>: <span class="hljs-number">0</span>,                                           // 任务状态 0=未开始；1=分块加密中；2=上载中；3=下载公有块中；4=等待授权中(等待私有块上传中)；5=下载私有块中；6=合成中；7=已完成；8=出现错误
+</div><div class="hljs-line">        <span class="hljs-attr">"percent"</span>: <span class="hljs-number">0</span>,                                          // 具体进度 单位：百分点 0~100之间
+</div><div class="hljs-line">        <span class="hljs-attr">"series_id"</span>: <span class="hljs-number">233</span>,                                      // 节目系列ID
+</div><div class="hljs-line">        <span class="hljs-attr">"source_id"</span>: <span class="hljs-number">233</span>,                                      // 母带文件ID
+</div><div class="hljs-line">        <span class="hljs-attr">"source_name"</span>: <span class="hljs-string">"仙剑奇侠传-电视版（第21集）"</span>,               // 视频母带源文件名
+</div><div class="hljs-line">        <span class="hljs-attr">"uuid"</span>: <span class="hljs-string">"283509238"</span>,                                   // 节目母带的UUID
+</div><div class="hljs-line">        <span class="hljs-attr">"ip"</span>: <span class="hljs-string">"QmdUVasivefLGRkT4R9mzcp82Qoc47UBb5G9bHXdZkW3RP"</span>,// 上载机IP
+</div><div class="hljs-line">        <span class="hljs-attr">"file"</span>: <span class="hljs-string">"仙剑奇侠传"</span>,                                    // 文件夹名
+</div><div class="hljs-line">        <span class="hljs-attr">"name"</span>: <span class="hljs-string">"仙剑奇侠传-电视版（第21集）"</span>,                      // 公有块文件名
+</div><div class="hljs-line">        <span class="hljs-attr">"size"</span>: <span class="hljs-number">102400</span>,                                         // 公有块文件大小，单位：B
+</div><div class="hljs-line">        <span class="hljs-attr">"hash"</span>: <span class="hljs-string">"QmTxvr8VXe37apeBjyPeAGZi5JiRSbwn8mr2DuuqR517Lo"</span>, // 公有块IPFS Hash
+</div><div class="hljs-line">        <span class="hljs-attr">"created_at"</span>: <span class="hljs-string">"2018-05-06 12:00:00"</span>                     // 任务创建时间
+</div><div class="hljs-line">    },
+</div><div class="hljs-line">    <span class="hljs-attr">"message"</span>: <span class="hljs-string">""</span>                                               // 用户提示文案信息, 空则无需提示
+</div><div class="hljs-line">}
+</div></code></pre>
+
+
+
+<h3 id="新建下载母带任务接口"><span id="jump3">新建下载母带任务接口</span></h3>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs armasm"><div class="hljs-line">&lt;<span class="hljs-built_in">PC</span>&gt;
+</div><div class="hljs-line">下载公有块文件时，使用节目ID新建一个下载任务。
+</div><div class="hljs-line">如果成功新建任务，则会返回该节目的响应信息及在调用IPFS命令进行下载时最重要的IPFS Hash值
+</div><div class="hljs-line">如果新建任务失败，这会返回服务端拒绝下载该节目的报错提示信息
+</div></code></pre>
+
+
+
+<h5 id="http-request-2">HTTP Request</h5>
+
+<blockquote>
+  <p>URL <code>GET /api/v1/tasks/download</code></p>
+  
+  <p>Param <code>FormData</code></p>
+</blockquote>
+
+<table><tbody><tr style="font-weight:bold">  <td>参数名</td>  <td>描述</td>  <td>类型</td>  <td>是否必传</td>  <td>默认值</td>  <td>备注</td></tr><tr>  <td>source_id</td>  <td>节目ID</td>  <td>int</td>  <td>是</td>  <td>无</td>  <td></td></tr></tbody></table>
+
+
+
+<h5 id="http-response-2">HTTP Response</h5>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="language-json hljs"><div class="hljs-line">{
+</div><div class="hljs-line">    <span class="hljs-attr">"data"</span>: {
+</div><div class="hljs-line">        <span class="hljs-attr">"id"</span>: <span class="hljs-number">233</span>,                                             // 任务ID
+</div><div class="hljs-line">        <span class="hljs-attr">"status"</span>: <span class="hljs-number">0</span>,                                           // 任务状态 0=未开始；1=分块加密中；2=上载中；3=下载公有块中；4=等待授权中(等待私有块上传中)；5=下载私有块中；6=合成中；7=已完成；8=出现错误
+</div><div class="hljs-line">        <span class="hljs-attr">"percent"</span>: <span class="hljs-number">0</span>,                                          // 具体进度 单位：百分点 0~100之间
+</div><div class="hljs-line">        <span class="hljs-attr">"series_id"</span>: <span class="hljs-number">233</span>,                                      // 节目系列ID
+</div><div class="hljs-line">        <span class="hljs-attr">"source_id"</span>: <span class="hljs-number">233</span>,                                      // 母带文件ID
+</div><div class="hljs-line">        <span class="hljs-attr">"source_name"</span>: <span class="hljs-string">"仙剑奇侠传-电视版（第21集）"</span>,               // 视频母带源文件名
+</div><div class="hljs-line">        <span class="hljs-attr">"uuid"</span>: <span class="hljs-string">"283509238"</span>,                                   // 节目母带的UUID
+</div><div class="hljs-line">        <span class="hljs-attr">"ip"</span>: <span class="hljs-string">"QmdUVasivefLGRkT4R9mzcp82Qoc47UBb5G9bHXdZkW3RP"</span>,// 上载机IP
+</div><div class="hljs-line">        <span class="hljs-attr">"file"</span>: <span class="hljs-string">"仙剑奇侠传"</span>,                                    // 文件夹名
+</div><div class="hljs-line">        <span class="hljs-attr">"name"</span>: <span class="hljs-string">"仙剑奇侠传-电视版（第21集）"</span>,                      // 公有块文件名
+</div><div class="hljs-line">        <span class="hljs-attr">"size"</span>: <span class="hljs-number">102400</span>,                                         // 公有块文件大小，单位：B
+</div><div class="hljs-line">        <span class="hljs-attr">"hash"</span>: <span class="hljs-string">"QmTxvr8VXe37apeBjyPeAGZi5JiRSbwn8mr2DuuqR517Lo"</span>, // 公有块IPFS Hash
+</div><div class="hljs-line">        <span class="hljs-attr">"created_at"</span>: <span class="hljs-string">"2018-05-06 12:00:00"</span>,                     // 任务创建时间
+</div><div class="hljs-line">        <span class="hljs-attr">"private_status"</span>: <span class="hljs-number">0</span>,                                     // 私有块上载任务状态 0=未开始；1=分块加密中；2=上载中；3=下载公有块中；4=等待授权中(等待私有块上传中)；5=下载私有块中；6=合成中；7=已完成；8=出现错误
+</div><div class="hljs-line">        <span class="hljs-attr">"private_name"</span>: <span class="hljs-string">"仙剑奇侠传-电视版（第21集）"</span>,               // 私有块文件名
+</div><div class="hljs-line">        <span class="hljs-attr">"private_size"</span>: <span class="hljs-number">0</span>,                                      // 私有块文件大小，单位：B
+</div><div class="hljs-line">        <span class="hljs-attr">"private_hash"</span>: <span class="hljs-string">""</span>                                      // 私有块IPFS Hash
+</div><div class="hljs-line">    },
+</div><div class="hljs-line">    <span class="hljs-attr">"message"</span>: <span class="hljs-string">""</span>                                               // 用户提示文案信息, 空则无需提示
+</div><div class="hljs-line">}
+</div></code></pre>
+
+<h3 id="更新下载母带任务状态接口"><span id="jump4">更新下载母带任务状态接口</span></h3>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs markdown"><div class="hljs-line"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">PC</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="hljs-bullet">1. </span>开始下载公有块开始至公有块下载完成，定时上传下载进度，更新任务状态
+</div><div class="hljs-line"><span class="hljs-bullet">2. </span>开始下载私有块开始至私有块下载完成，定时上传下载进度，更新任务状态
+</div><div class="hljs-line"><span class="hljs-bullet">3. </span>开始本地合成， 更新任务状态
+</div><div class="hljs-line"><span class="hljs-bullet">4. </span>合成结束，整个下载任务结束，更新任务状态
+</div></code></pre>
+
+
+
+<h5 id="http-request-3">HTTP Request</h5>
+
+<blockquote>
+  <p>URL <code>PATCH /api/v1/tasks/download/{任务ID}</code></p>
+</blockquote>
+
+<p><br></p>
+
+<blockquote>
+  <p>Param <code>FormData</code></p>
+</blockquote>
+
+<table><tbody><tr style="font-weight:bold">  <td>参数名</td>  <td>描述</td>  <td>类型</td>  <td>是否必传</td>  <td>默认值</td>  <td>备注</td></tr><tr>  <td>status</td>  <td>状态值</td>  <td>int</td>  <td>是</td>  <td>无</td>  <td>0=未开始；1=分块加密中；2=上载中；3=下载公有块中；4=等待授权中(等待私有块上传中)；5=下载私有块中；6=合成中；7=已完成；8=出现错误</td></tr><tr>  <td>percent</td>  <td>数值</td>  <td>int</td>  <td>否</td>  <td>无</td>  <td>0~100的数字，只需要在能拿到进度的状态下上传即可，其他只需要在完成是传100</td></tr></tbody></table>
+
+
+
+<h5 id="http-response-3">HTTP Response</h5>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="language-json hljs"><div class="hljs-line">{
+</div><div class="hljs-line">    <span class="hljs-attr">"data"</span>: {
+</div><div class="hljs-line">        <span class="hljs-attr">"id"</span>: <span class="hljs-number">233</span>,                                             // 任务ID
+</div><div class="hljs-line">        <span class="hljs-attr">"status"</span>: <span class="hljs-number">0</span>,                                           // 任务状态 0=未开始；1=分块加密中；2=上载中；3=下载公有块中；4=等待授权中(等待私有块上传中)；5=下载私有块中；6=合成中；7=已完成；8=出现错误
+</div><div class="hljs-line">        <span class="hljs-attr">"percent"</span>: <span class="hljs-number">0</span>,                                          // 具体进度 单位：百分点 0~100之间
+</div><div class="hljs-line">        <span class="hljs-attr">"series_id"</span>: <span class="hljs-number">233</span>,                                      // 节目系列ID
+</div><div class="hljs-line">        <span class="hljs-attr">"source_id"</span>: <span class="hljs-number">233</span>,                                      // 母带文件ID
+</div><div class="hljs-line">        <span class="hljs-attr">"source_name"</span>: <span class="hljs-string">"仙剑奇侠传-电视版（第21集）"</span>,               // 视频母带源文件名
+</div><div class="hljs-line">        <span class="hljs-attr">"uuid"</span>: <span class="hljs-string">"283509238"</span>,                                   // 节目母带的UUID
+</div><div class="hljs-line">        <span class="hljs-attr">"ip"</span>: <span class="hljs-string">"QmdUVasivefLGRkT4R9mzcp82Qoc47UBb5G9bHXdZkW3RP"</span>,// 上载机IP
+</div><div class="hljs-line">        <span class="hljs-attr">"file"</span>: <span class="hljs-string">"仙剑奇侠传"</span>,                                    // 文件夹名
+</div><div class="hljs-line">        <span class="hljs-attr">"name"</span>: <span class="hljs-string">"仙剑奇侠传-电视版（第21集）"</span>,                      // 公有块文件名
+</div><div class="hljs-line">        <span class="hljs-attr">"size"</span>: <span class="hljs-number">102400</span>,                                         // 公有块文件大小，单位：B
+</div><div class="hljs-line">        <span class="hljs-attr">"hash"</span>: <span class="hljs-string">"QmTxvr8VXe37apeBjyPeAGZi5JiRSbwn8mr2DuuqR517Lo"</span>, // 公有块IPFS Hash
+</div><div class="hljs-line">        <span class="hljs-attr">"created_at"</span>: <span class="hljs-string">"2018-05-06 12:00:00"</span>,                    // 任务创建时间
+</div><div class="hljs-line">        <span class="hljs-attr">"private_status"</span>: <span class="hljs-number">0</span>,                                     // 0=未开始；1=分块加密中；2=上载中；3=下载公有块中；4=等待授权中(等待私有块上传中)；5=下载私有块中；6=合成中；7=已完成；8=出现错误
+</div><div class="hljs-line">        <span class="hljs-attr">"private_name"</span>: <span class="hljs-string">"仙剑奇侠传-电视版（第21集）"</span>,               // 私有块文件名
+</div><div class="hljs-line">        <span class="hljs-attr">"private_size"</span>: <span class="hljs-number">0</span>,                                      // 私有块文件大小，单位：B
+</div><div class="hljs-line">        <span class="hljs-attr">"private_hash"</span>: <span class="hljs-string">""</span>                                      // 私有块IPFS Hash
+</div><div class="hljs-line">    },
+</div><div class="hljs-line">    <span class="hljs-attr">"message"</span>: <span class="hljs-string">""</span>                                               // 用户提示文案信息, 空则无需提示
+</div><div class="hljs-line">}
+</div></code></pre>
+
+<h3 id="获取下载母带任务详情接口"><span id="jump5">获取下载母带任务详情接口</span></h3>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs mathematica"><div class="hljs-line">&lt;PC&gt;
+</div><div class="hljs-line">当公有块下载完成后，定时查询任务的私有块IPFS的<span class="hljs-keyword">Hash</span>值，直至获取到私有块IPFS <span class="hljs-keyword">Hash</span>，更新任务状态
+</div></code></pre>
+
+
+
+<h5 id="http-request-4">HTTP Request</h5>
+
+<blockquote>
+  <p>URL <code>GET /api/v1/tasks/download/{任务ID}</code></p>
+</blockquote>
+
+
+
+<h5 id="http-response-4">HTTP Response</h5>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="language-json hljs"><div class="hljs-line">{
+</div><div class="hljs-line">    <span class="hljs-attr">"data"</span>: {
+</div><div class="hljs-line">        <span class="hljs-attr">"id"</span>: <span class="hljs-number">233</span>,                                             // 任务ID
+</div><div class="hljs-line">        <span class="hljs-attr">"status"</span>: <span class="hljs-number">0</span>,                                           // 任务状态 0=未开始；1=分块加密中；2=上载中；3=下载公有块中；4=等待授权中(等待私有块上传中)；5=下载私有块中；6=合成中；7=已完成；8=出现错误
+</div><div class="hljs-line">        <span class="hljs-attr">"percent"</span>: <span class="hljs-number">0</span>,                                          // 具体进度 单位：百分点 0~100之间
+</div><div class="hljs-line">        <span class="hljs-attr">"series_id"</span>: <span class="hljs-number">233</span>,                                      // 节目系列ID
+</div><div class="hljs-line">        <span class="hljs-attr">"source_id"</span>: <span class="hljs-number">233</span>,                                      // 母带文件ID
+</div><div class="hljs-line">        <span class="hljs-attr">"source_name"</span>: <span class="hljs-string">"仙剑奇侠传-电视版（第21集）"</span>,               // 视频母带源文件名
+</div><div class="hljs-line">        <span class="hljs-attr">"uuid"</span>: <span class="hljs-string">"283509238"</span>,                                   // 节目母带的UUID
+</div><div class="hljs-line">        <span class="hljs-attr">"ip"</span>: <span class="hljs-string">"QmdUVasivefLGRkT4R9mzcp82Qoc47UBb5G9bHXdZkW3RP"</span>,// 上载机IP
+</div><div class="hljs-line">        <span class="hljs-attr">"file"</span>: <span class="hljs-string">"仙剑奇侠传"</span>,                                    // 文件夹名
+</div><div class="hljs-line">        <span class="hljs-attr">"name"</span>: <span class="hljs-string">"仙剑奇侠传-电视版（第21集）"</span>,                      // 公有块文件名
+</div><div class="hljs-line">        <span class="hljs-attr">"size"</span>: <span class="hljs-number">102400</span>,                                         // 公有块文件大小，单位：B
+</div><div class="hljs-line">        <span class="hljs-attr">"hash"</span>: <span class="hljs-string">"QmTxvr8VXe37apeBjyPeAGZi5JiRSbwn8mr2DuuqR517Lo"</span>, // 公有块IPFS Hash
+</div><div class="hljs-line">        <span class="hljs-attr">"created_at"</span>: <span class="hljs-string">"2018-05-06 12:00:00"</span>,                     // 任务创建时间
+</div><div class="hljs-line">        <span class="hljs-attr">"private_status"</span>: <span class="hljs-number">0</span>,                                     // 私有块上载任务状态 0=未开始；1=分块加密中；2=上载中；3=下载公有块中；4=等待授权中(等待私有块上传中)；5=下载私有块中；6=合成中；7=已完成；8=出现错误
+</div><div class="hljs-line">        <span class="hljs-attr">"private_name"</span>: <span class="hljs-string">"仙剑奇侠传-电视版（第21集）"</span>,               // 私有块文件名
+</div><div class="hljs-line">        <span class="hljs-attr">"private_size"</span>: <span class="hljs-number">0</span>,                                      // 私有块文件大小，单位：B
+</div><div class="hljs-line">        <span class="hljs-attr">"private_hash"</span>: <span class="hljs-string">""</span>                                      // 私有块IPFS Hash
+</div><div class="hljs-line">    },
+</div><div class="hljs-line">    <span class="hljs-attr">"message"</span>: <span class="hljs-string">""</span>                                               // 用户提示文案信息, 空则无需提示
+</div><div class="hljs-line">}
+</div></code></pre>
+
+<h3 id="获取上载私有块任务列表接口"><span id="jump6">获取上载私有块任务列表接口</span></h3>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs armasm"><div class="hljs-line">&lt;<span class="hljs-built_in">PC</span>&gt;
+</div><div class="hljs-line">当用户在Web端点击上传私有块文件后，调起客户端时，查询需要上传的私有块列表
+</div></code></pre>
+
+
+
+<h5 id="http-request-5">HTTP Request</h5>
+
+<blockquote>
+  <p>URL <code>GET /api/v1/tasks/upload/private</code></p>
+</blockquote>
+
+
+
+<h5 id="http-response-5">HTTP Response</h5>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="language-json hljs"><div class="hljs-line">{
+</div><div class="hljs-line">    <span class="hljs-attr">"data"</span>: [
+</div><div class="hljs-line">        {
+</div><div class="hljs-line">            <span class="hljs-attr">"id"</span>: <span class="hljs-number">233</span>,                                             // 任务ID
+</div><div class="hljs-line">            <span class="hljs-attr">"status"</span>: <span class="hljs-number">0</span>,                                           // 任务状态 0=未开始；1=分块加密中；2=上载中；3=下载公有块中；4=等待授权中(等待私有块上传中)；5=下载私有块中；6=合成中；7=已完成；8=出现错误
+</div><div class="hljs-line">            <span class="hljs-attr">"percent"</span>: <span class="hljs-number">0</span>,                                          // 具体进度 单位：百分点 0~100之间
+</div><div class="hljs-line">            <span class="hljs-attr">"series_id"</span>: <span class="hljs-number">233</span>,                                      // 节目系列ID
+</div><div class="hljs-line">            <span class="hljs-attr">"source_id"</span>: <span class="hljs-number">233</span>,                                      // 母带文件ID
+</div><div class="hljs-line">            <span class="hljs-attr">"source_name"</span>: <span class="hljs-string">"仙剑奇侠传-电视版（第21集）"</span>,               // 视频母带源文件名
+</div><div class="hljs-line">            <span class="hljs-attr">"uuid"</span>: <span class="hljs-string">"283509238"</span>,                                   // 节目母带的UUID
+</div><div class="hljs-line">            <span class="hljs-attr">"ip"</span>: <span class="hljs-string">"QmdUVasivefLGRkT4R9mzcp82Qoc47UBb5G9bHXdZkW3RP"</span>,// 上载机IP
+</div><div class="hljs-line">            <span class="hljs-attr">"file"</span>: <span class="hljs-string">"仙剑奇侠传"</span>,                                    // 文件夹名
+</div><div class="hljs-line">            <span class="hljs-attr">"name"</span>: <span class="hljs-string">"仙剑奇侠传-电视版（第21集）"</span>,                      // 公有块文件名
+</div><div class="hljs-line">            <span class="hljs-attr">"size"</span>: <span class="hljs-number">102400</span>,                                         // 公有块文件大小，单位：B
+</div><div class="hljs-line">            <span class="hljs-attr">"hash"</span>: <span class="hljs-string">"QmTxvr8VXe37apeBjyPeAGZi5JiRSbwn8mr2DuuqR517Lo"</span>, // 公有块IPFS Hash
+</div><div class="hljs-line">            <span class="hljs-attr">"created_at"</span>: <span class="hljs-string">"2018-05-06 12:00:00"</span>                     // 任务创建时间
+</div><div class="hljs-line">        }
+</div><div class="hljs-line">    ],
+</div><div class="hljs-line">    <span class="hljs-attr">"message"</span>: <span class="hljs-string">""</span>,
+</div><div class="hljs-line">    <span class="hljs-attr">"meta"</span>: {
+</div><div class="hljs-line">        <span class="hljs-attr">"status_choices"</span>: [
+</div><div class="hljs-line">            {
+</div><div class="hljs-line">                <span class="hljs-attr">"code"</span>: <span class="hljs-number">0</span>,
+</div><div class="hljs-line">                <span class="hljs-attr">"name"</span>: <span class="hljs-string">"未开始"</span>
+</div><div class="hljs-line">            },
+</div><div class="hljs-line">            {
+</div><div class="hljs-line">                <span class="hljs-attr">"code"</span>: <span class="hljs-number">3</span>,
+</div><div class="hljs-line">                <span class="hljs-attr">"name"</span>: <span class="hljs-string">"上载中"</span>
+</div><div class="hljs-line">            },
+</div><div class="hljs-line">            {
+</div><div class="hljs-line">                <span class="hljs-attr">"code"</span>: <span class="hljs-number">8</span>,
+</div><div class="hljs-line">                <span class="hljs-attr">"name"</span>: <span class="hljs-string">"已完成"</span>
+</div><div class="hljs-line">            },
+</div><div class="hljs-line">            {
+</div><div class="hljs-line">                <span class="hljs-attr">"code"</span>: <span class="hljs-number">9</span>,
+</div><div class="hljs-line">                <span class="hljs-attr">"name"</span>: <span class="hljs-string">"出现错误"</span>
+</div><div class="hljs-line">            }
+</div><div class="hljs-line">        ]
+</div><div class="hljs-line">    }
+</div><div class="hljs-line">}
+</div></code></pre>
+
+
+
+<h3 id="更新上载私有块任务状态接口"><span id="jump7">更新上载私有块任务状态接口</span></h3>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs markdown"><div class="hljs-line"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">PC</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="hljs-bullet">1. </span>调用IPFS进行上传时，提交更新状态，同时将IPFS需要的相关数据上传
+</div><div class="hljs-line"><span class="hljs-bullet">2. </span>最终IPFS上传成功或失败，提交更新状态
+</div></code></pre>
+
+<p>``</p>
+
+
+
+<h5 id="http-request-6">HTTP Request</h5>
+
+<blockquote>
+  <p>URL <code>PATCH /api/v1/tasks/upload/private/{任务ID}</code></p>
+  
+  <p>Param <code>FormData</code></p>
+</blockquote>
+
+<table><tbody><tr style="font-weight:bold">  <td>参数名</td>  <td>描述</td>  <td>类型</td>  <td>是否必传</td>  <td>默认值</td>  <td>备注</td></tr><tr>  <td>status</td>  <td>状态值</td>  <td>int</td>  <td>是</td>  <td>无</td>  <td>0=未开始；1=分块加密中；2=上载中；3=下载公有块中；4=等待授权中(等待私有块上传中)；5=下载私有块中；6=合成中；7=已完成；8=出现错误</td></tr><tr>  <td>percent</td>  <td>数值</td>  <td>int</td>  <td>否</td>  <td>无</td>  <td>0~100的数字，只需要传可以拿到的进度，没有进度不需要传</td></tr><tr>  <td>name</td>  <td>文件名</td>  <td>str</td>  <td>是</td>  <td>无</td>  <td>节目母带文件名</td></tr><tr>  <td>file</td>  <td>文件夹名称</td>  <td>str</td>  <td>是</td>  <td>无</td>  <td>节目母带文件夹名称</td></tr><tr>  <td>hash</td>  <td>文件HASH值</td>  <td>str</td>  <td>是</td>  <td>无</td>  <td>调用IPFS上传成功时返回的公有块Hash</td></tr><tr>  <td>size</td>  <td>文件大小</td>  <td>float</td>  <td>是</td>  <td>无</td>  <td>公有块文件大小</td></tr><tr>  <td>ip</td>  <td>上载机IPFS的IP</td>  <td>str</td>  <td>是</td>  <td>无</td>  <td></td></tr></tbody></table>
+
+
+
+<h5 id="http-response-6">HTTP Response</h5>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="language-json hljs"><div class="hljs-line">{
+</div><div class="hljs-line">    <span class="hljs-attr">"data"</span>: {
+</div><div class="hljs-line">        <span class="hljs-attr">"id"</span>: <span class="hljs-number">233</span>,                                             // 任务ID
+</div><div class="hljs-line">        <span class="hljs-attr">"status"</span>: <span class="hljs-number">0</span>,                                           // 任务状态 0=未开始；1=分块加密中；2=上载中；3=下载公有块中；4=等待授权中(等待私有块上传中)；5=下载私有块中；6=合成中；7=已完成；8=出现错误
+</div><div class="hljs-line">        <span class="hljs-attr">"percent"</span>: <span class="hljs-number">0</span>,                                          // 具体进度 单位：百分点 0~100之间
+</div><div class="hljs-line">        <span class="hljs-attr">"series_id"</span>: <span class="hljs-number">233</span>,                                      // 节目系列ID
+</div><div class="hljs-line">        <span class="hljs-attr">"source_id"</span>: <span class="hljs-number">233</span>,                                      // 母带文件ID
+</div><div class="hljs-line">        <span class="hljs-attr">"source_name"</span>: <span class="hljs-string">"仙剑奇侠传-电视版（第21集）"</span>,               // 视频母带源文件名
+</div><div class="hljs-line">        <span class="hljs-attr">"uuid"</span>: <span class="hljs-string">"283509238"</span>,                                   // 节目母带的UUID
+</div><div class="hljs-line">        <span class="hljs-attr">"ip"</span>: <span class="hljs-string">"QmdUVasivefLGRkT4R9mzcp82Qoc47UBb5G9bHXdZkW3RP"</span>,// 上载机IP
+</div><div class="hljs-line">        <span class="hljs-attr">"file"</span>: <span class="hljs-string">"仙剑奇侠传"</span>,                                    // 文件夹名
+</div><div class="hljs-line">        <span class="hljs-attr">"name"</span>: <span class="hljs-string">"仙剑奇侠传-电视版（第21集）"</span>,                      // 公有块文件名
+</div><div class="hljs-line">        <span class="hljs-attr">"size"</span>: <span class="hljs-number">102400</span>,                                         // 公有块文件大小，单位：B
+</div><div class="hljs-line">        <span class="hljs-attr">"hash"</span>: <span class="hljs-string">"QmTxvr8VXe37apeBjyPeAGZi5JiRSbwn8mr2DuuqR517Lo"</span>, // 公有块IPFS Hash
+</div><div class="hljs-line">        <span class="hljs-attr">"created_at"</span>: <span class="hljs-string">"2018-05-06 12:00:00"</span>                     // 任务创建时间
+</div><div class="hljs-line">    },
+</div><div class="hljs-line">    <span class="hljs-attr">"message"</span>: <span class="hljs-string">""</span>                                               // 用户提示文案信息, 空则无需提示
+</div><div class="hljs-line">}
+</div></code></pre></div></body></html>

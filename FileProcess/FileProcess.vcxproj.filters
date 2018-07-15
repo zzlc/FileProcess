@@ -51,6 +51,12 @@
     <ClCompile Include="aes128\test.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="interface\BaseFileProcess.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="interface\FileProcessInterface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="FileProcess.h">
@@ -74,6 +80,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Global\minidump.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="interface\BaseFileProcess.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="interface\FileProcessInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
