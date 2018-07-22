@@ -1,0 +1,24 @@
+[2018-07-22 16:37:58.460][8288][info] Version Build Time:Jul 22 2018 16:25:40
+[2018-07-22 16:38:40.075][5760][info] Version Build Time:Jul 22 2018 16:25:40
+[2018-07-22 16:39:09.709][1960][info] Version Build Time:Jul 22 2018 16:25:40
+[2018-07-22 16:58:37.179][2252][info] Version Build Time:Jul 22 2018 16:25:40
+[2018-07-22 16:59:33.825][6304][info] Version Build Time:Jul 22 2018 16:25:40
+[2018-07-22 16:59:45.643][6264][info] Version Build Time:Jul 22 2018 16:25:40
+[2018-07-22 17:00:27.113][7924][info] Version Build Time:Jul 22 2018 16:25:40
+[2018-07-22 17:01:51.470][1268][info] Version Build Time:Jul 22 2018 16:25:40
+[2018-07-22 17:02:31.762][10312][info] Version Build Time:Jul 22 2018 16:25:40
+[2018-07-22 17:03:30.793][5716][info] Version Build Time:Jul 22 2018 16:25:40
+[2018-07-22 17:03:42.074][5716][info] IBaseProcess::SliceFile open file:D:/1, 微信软件使用教程.mp4, dest_path:D:/1, slice count:5, uuid:9e7f615a358f47d789d2a6580df5436d
+[2018-07-22 17:03:42.074][5716][info] CGlobalConfig::CGlobalConfig
+[2018-07-22 17:03:42.167][5716][info] IBaseProcess::SliceFile open media file:微信软件使用教程.mp4 success.
+[2018-07-22 17:09:08.134][3836][info] Version Build Time:Jul 22 2018 16:25:40
+[2018-07-22 17:09:37.771][3836][info] IBaseProcess::MergeFile src private file name:D:/1/微信软件使用教程.mp4_pri_9e7f615a358f47d789d2a6580df5436d, dest_path:D:/1
+[2018-07-22 17:09:37.771][3836][info] src public file name:D:/1/微信软件使用教程.mp4_pub_9e7f615a358f47d789d2a6580df5436d_1
+[2018-07-22 17:09:37.771][3836][info] src public file name:D:/1/微信软件使用教程.mp4_pub_9e7f615a358f47d789d2a6580df5436d_2
+[2018-07-22 17:09:37.771][3836][info] src public file name:D:/1/微信软件使用教程.mp4_pub_9e7f615a358f47d789d2a6580df5436d_3
+[2018-07-22 17:09:37.771][3836][info] src public file name:D:/1/微信软件使用教程.mp4_pub_9e7f615a358f47d789d2a6580df5436d_4
+[2018-07-22 17:09:37.771][3836][info] src public file name:D:/1/微信软件使用教程.mp4_pub_9e7f615a358f47d789d2a6580df5436d_5
+[2018-07-22 17:09:37.771][3836][info] CGlobalConfig::CGlobalConfig
+[2018-07-22 17:09:37.772][3836][info] IBaseProcess::MergeFile Gererate dest file name:D:/1/微信软件使用教程.mp4 success.
+[2018-07-22 17:09:37.907][3836][warning] IBaseProcess::MergeFile line 237 public file end!
+[2018-07-22 17:09:37.909][3836][warning] IBaseProcess::MergeFile line 278 private file end!
