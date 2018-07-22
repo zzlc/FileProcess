@@ -93,7 +93,7 @@ copy $(ProjectDir)$(Platform)\$(Configuration)\$(TargetName).pdb $(ProjectDir)bi
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;_UNICODE;WIN32;WIN64;NDEBUG;DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(ProjectDIr)3rd\ffmpeg\include;$(ProjectDIr)3rd;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -112,7 +112,7 @@ copy $(ProjectDir)$(Platform)\$(Configuration)\$(TargetName).pdb $(ProjectDir)bi
       <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
       <IncludePath>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(ProjectDIr)3rd\ffmpeg\include;$(ProjectDIr)3rd;%(AdditionalIncludeDirectories)</IncludePath>
-      <Define>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;DLL_EXPORT;%(PreprocessorDefinitions)</Define>
+      <Define>UNICODE;_UNICODE;WIN32;WIN64;NDEBUG;DLL_EXPORT;%(PreprocessorDefinitions)</Define>
     </QtMoc>
     <QtUic>
       <ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription>
@@ -127,47 +127,30 @@ copy $(ProjectDir)$(Platform)\$(Configuration)\$(TargetName).pdb $(ProjectDir)bi
 copy $(ProjectDir)$(Platform)\$(Configuration)\$(TargetName).pdb $(ProjectDir)bin\
 copy $(ProjectDir)$(Platform)\$(Configuration)\$(TargetName).dll $(ProjectDir)..\release\dll
 copy $(ProjectDir)$(Platform)\$(Configuration)\$(TargetName).lib $(ProjectDir)..\release\lib
-copy $(ProjectDir)interface\FileProcessInterface.h $(ProjectDir)..\release\include</Command>
+copy $(ProjectDir)interface\FileProcessInterface.h $(ProjectDir)..\release\include
+copy $(ProjectDir)$(Platform)\$(Configuration)\$(TargetName).dll $(ProjectDir)..\bin\
+copy $(ProjectDir)$(Platform)\$(Configuration)\$(TargetName).pdb $(ProjectDir)..\bin\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="aes128\aes.c" />
-    <ClCompile Include="aes128\test.c" />
-    <ClCompile Include="FileProcess.cpp" />
     <ClCompile Include="Global\GlobalConfig.cpp" />
     <ClCompile Include="IBaseProcess.cpp" />
     <ClCompile Include="interface\BaseFileProcess.cpp" />
     <ClCompile Include="interface\FileProcessInterface.cpp" />
-    <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="FileProcess.h">
-      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(ProjectDIr)3rd\ffmpeg\include;$(ProjectDIr)3rd</IncludePath>
-      <Define Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;DLL_EXPORT;_WINDLL</Define>
-      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(ProjectDIr)3rd\ffmpeg\include;$(ProjectDIr)3rd</IncludePath>
-      <Define Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;DLL_EXPORT;_WINDLL</Define>
-    </QtMoc>
-  </ItemGroup>
-  <ItemGroup>
-    <QtUic Include="Resources\FileProcess.ui" />
-    <QtUic Include="Resources\ProgressWidget.ui" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtRcc Include="Resources\FileProcess.qrc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aes128\aes.h" />
     <ClInclude Include="aes128\aes.hpp" />
     <ClInclude Include="Global\GlobalConfig.h" />
-    <ClInclude Include="Global\minidump.h" />
     <ClInclude Include="interface\BaseFileProcess.h" />
     <ClInclude Include="interface\FileProcessInterface.h" />
-    <QtMoc Include="IBaseProcess.h">
+    <ClInclude Include="IBaseProcess.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(ProjectDIr)3rd\ffmpeg\include;$(ProjectDIr)3rd</IncludePath>
       <Define Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB</Define>
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(ProjectDIr)3rd\ffmpeg\include;$(ProjectDIr)3rd</IncludePath>
       <Define Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB</Define>
-    </QtMoc>
+    </ClInclude>
     <ClInclude Include="Global\Log.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

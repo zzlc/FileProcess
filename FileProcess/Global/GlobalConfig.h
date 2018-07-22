@@ -6,7 +6,6 @@
 #include <list>
 #include <future>
 #include <chrono>
-#include <QUuid>
 #include "Log.h"
 
 using namespace std;

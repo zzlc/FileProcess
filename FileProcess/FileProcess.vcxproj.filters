@@ -33,12 +33,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FileProcess.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="IBaseProcess.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -48,23 +42,12 @@
     <ClCompile Include="aes128\aes.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="aes128\test.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="interface\BaseFileProcess.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="interface\FileProcessInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="FileProcess.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="IBaseProcess.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\GlobalConfig.h">
@@ -79,27 +62,14 @@
     <ClInclude Include="aes128\aes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Global\minidump.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="interface\BaseFileProcess.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="interface\FileProcessInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <QtUic Include="Resources\FileProcess.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="Resources\ProgressWidget.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-  </ItemGroup>
-  <ItemGroup>
-    <QtRcc Include="Resources\FileProcess.qrc">
-      <Filter>Resource Files</Filter>
-    </QtRcc>
+    <ClInclude Include="IBaseProcess.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

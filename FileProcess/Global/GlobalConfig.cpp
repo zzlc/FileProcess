@@ -47,8 +47,9 @@ const std::string& CGlobalConfig::GetCurrentFileName()
 
 std::string CGlobalConfig::CreateUUID()
 {
-    QUuid uid = QUuid::createUuid();
-    return uid.toString().remove("{").remove("}").remove("-").toStdString();
+    //QUuid uid = QUuid::createUuid();
+    //return uid.toString().remove("{").remove("}").remove("-").toStdString();
+    return "";
 }
 
 std::wstring utf8_to_wstring(const std::string& utf8_str_)

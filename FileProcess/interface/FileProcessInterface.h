@@ -6,9 +6,9 @@
 #include <string>
 
 #ifdef DLL_EXPORT
-#define _EXPORT_INTERFACE _declspec(dllexport)
+#define _EXPORT_INTERFACE __declspec(dllexport)
 #else 
-#define _EXPORT_INTERFACE _declspce(dllimport)
+#define _EXPORT_INTERFACE __declspec(dllimport)
 #endif // DLL_EXPORT
 
 class _EXPORT_INTERFACE FileProcessInterface
@@ -21,7 +21,7 @@ public:
     // @param [in] interface_ptr
     //        由 FileProcessInterface::ObtainSingleInterface() 生成
     // @return 0:success; -1:failed
-    int ReleaseInterface(FileProcessInterface* interface_ptr);
+    static int ReleaseInterface(FileProcessInterface* interface_ptr);
 
     // 分割文件并加密存储
     // @param [in] aes_key

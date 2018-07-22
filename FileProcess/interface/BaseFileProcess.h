@@ -32,6 +32,8 @@ protected:
         __out std::string& dest_file_name
     );
 
+    bool CheckFiles(const string& private_file_name_, const list<string>& public_file_list_);
+
 protected:
     static IBaseFileProcess* _base_fp_ptr;
 };

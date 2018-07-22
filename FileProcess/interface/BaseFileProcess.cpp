@@ -1,6 +1,6 @@
 #include "interface/BaseFileProcess.h"
 #include "IBaseProcess.h"
-#include <FileProcess.h>
+//#include <FileProcess.h>
 
 IBaseFileProcess* IBaseFileProcess::_base_fp_ptr = nullptr;
 
@@ -14,10 +14,12 @@ FileProcessInterface* IBaseFileProcess::ObtainSingleInterface()
 
 IBaseFileProcess::IBaseFileProcess()
 {
+    CSpdLog::Instance()->SetLogFileName("log.txt");
 }
 
 IBaseFileProcess::~IBaseFileProcess()
 {
+    CSpdLog::Instance()->GetLogger()->flush();
     _base_fp_ptr = nullptr;
 }
 
@@ -62,7 +64,7 @@ int IBaseFileProcess::MergeFile(
         return -1;
     }
     shared_ptr<IBaseProcess> _file_fp_ptr(new IBaseProcess);
-    if (!FileProcess::CheckFiles(src_private_file_name, src_public_file_name_list)) {
+    if (!CheckFiles(src_private_file_name, src_public_file_name_list)) {
         return -2;
     }
 
@@ -73,4 +75,67 @@ int IBaseFileProcess::MergeFile(
         dest_path,
         dest_file_name
     );
+}
+
+bool IBaseFileProcess::CheckFiles(const string& private_file_name_, const list<string>& public_file_list_)
+{
+    if (private_file_name_.empty() || public_file_list_.empty()) {
+        LOGGER->warn("{} private file:{} ,public file count:{} ,params error!",
+            __FUNCTION__, private_file_name_, public_file_list_.size());
+        return false;
+    }
+    // check exist?
+    if (!FileExist(private_file_name_)) {
+        LOGGER->warn("{} file:{} not exist!", __FUNCTION__, private_file_name_);
+        return false;
+    }
+    for (auto && itor : public_file_list_) {
+        if (!FileExist(itor)) {
+            LOGGER->warn("{} file:{} not exist!", __FUNCTION__, private_file_name_);
+            return false;
+        }
+    }
+    FILE *tmp_fp = NULL;
+    uint8_t src_uuid_buf[32] = { 0 };
+    uint8_t tmp_uuid_buf[32] = { 0 };
+    errno_t ret = fopen_s(&tmp_fp, private_file_name_.c_str(), "rb");
+    if (ret != 0) {
+        LOGGER->warn("{} file:{} open failed!", __FUNCTION__, private_file_name_);
+        return false;
+    }
+    if (0 != _fseeki64(tmp_fp, -32LL, SEEK_END)) {
+        LOGGER->warn("{} seek file:{} failed!", __FUNCTION__, private_file_name_);
+        fclose(tmp_fp);
+        return false;
+    }
+    ret = fread(src_uuid_buf, 1, sizeof(src_uuid_buf), tmp_fp);
+    if (ret != sizeof(src_uuid_buf)) {
+        LOGGER->warn("{} read file:{} failed!", __FUNCTION__, private_file_name_);
+        fclose(tmp_fp);
+        return false;
+    }
+    fclose(tmp_fp);
+
+    // 检查公有块 UUID 是否与私有块一致 
+    for (auto&& itor : public_file_list_) {
+        shared_ptr<FILE> fp_ptr(fopen(itor.c_str(), "rb"), [](FILE* fp) { fclose(fp); });
+        if (!fp_ptr) {
+            LOGGER->warn("{} open file:{} failed!", __FUNCTION__, itor);
+            return false;
+        }
+        if (0 != _fseeki64(fp_ptr.get(), -32LL, SEEK_END)) {
+            LOGGER->warn("{} seek file:{} failed!", __FUNCTION__, itor);
+            return false;
+        }
+        ret = fread(tmp_uuid_buf, 1, sizeof(src_uuid_buf), fp_ptr.get());
+        if (ret != sizeof(src_uuid_buf)) {
+            LOGGER->warn("{} read file:{} failed!", __FUNCTION__, itor);
+            return false;
+        }
+        if (memcmp(src_uuid_buf, tmp_uuid_buf, sizeof(src_uuid_buf)) != 0) {
+            LOGGER->warn("{} file:{} uuid not equal private uuid!", __FUNCTION__, itor);
+            return false;
+        }
+    }
+    return true;
 }

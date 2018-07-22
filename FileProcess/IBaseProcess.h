@@ -1,6 +1,5 @@
 #pragma once
 #include "Global/GlobalConfig.h"
-#include <QObject>
 extern "C" {
 #include "aes128/aes.h"
 }
@@ -133,9 +132,8 @@ struct MergeFileInfo {
     }
 };
 
-class IBaseProcess : public QObject
+class IBaseProcess
 {
-    Q_OBJECT
 public:
     IBaseProcess();
     virtual ~IBaseProcess();
